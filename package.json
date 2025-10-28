@@ -9,10 +9,19 @@
     "client": "cd frontend && npm run dev",
     "seed": "cd server && npm run seed"
   },
-  "keywords": ["appointments", "healthcare", "sms", "tanzania", "sdg"],
+  "keywords": [
+    "appointments",
+    "healthcare",
+    "sms",
+    "tanzania",
+    "sdg"
+  ],
   "author": "Isheboy",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "uuid": "^9.0.1"
   }
 }

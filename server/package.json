@@ -22,7 +22,8 @@
     "africastalking": "^0.7.7",
     "twilio": "^4.19.0",
     "date-fns": "^2.29.3",
-    "date-fns-tz": "^2.0.0"
+    "date-fns-tz": "^2.0.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
