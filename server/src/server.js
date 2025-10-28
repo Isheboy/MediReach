@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const facilityRoutes = require("./routes/facilityRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
+const smsRoutes = require("./routes/smsRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -21,6 +22,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/facilities", facilityRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/reminders", reminderRoutes);
+app.use("/api/sms", smsRoutes);
 
 // Root
 app.get("/", (req, res) => {

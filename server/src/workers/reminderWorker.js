@@ -31,9 +31,24 @@ async function sendReminder(reminder) {
     while (attempt <= MAX_RETRIES) {
       try {
         const result = await smsService.sendSms(reminder.patientPhone, message);
+
+        // Persist provider response and any provider messageId so callbacks can be matched
         reminder.status = "sent";
         reminder.sentAt = new Date();
         reminder.providerResponse = result;
+        try {
+          const resObj = result && result.result;
+          // AT response shape: result.SMSMessageData.Recipients[0].messageId
+          const messageId =
+            resObj &&
+            resObj.SMSMessageData &&
+            resObj.SMSMessageData.Recipients &&
+            resObj.SMSMessageData.Recipients[0] &&
+            resObj.SMSMessageData.Recipients[0].messageId;
+          if (messageId) reminder.providerMessageId = messageId;
+        } catch (e) {
+          // ignore parsing errors
+        }
         await reminder.save();
         console.log(
           `✅ Reminder ${reminder._id} sent to ${reminder.patientPhone}`

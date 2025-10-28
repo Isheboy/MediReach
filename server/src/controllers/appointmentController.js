@@ -91,6 +91,8 @@ const updateAppointmentStatus = async (req, res) => {
   }
 };
 
+const Reminder = require('../models/Reminder');
+
 const sendTestSms = async (req, res) => {
   try {
     const { id } = req.params;
@@ -106,6 +108,26 @@ const sendTestSms = async (req, res) => {
     const message = `Test SMS: Hello ${appointment.patientId.name}, this is a test reminder for your appointment at ${appointment.facilityId.name} on ${appointment.scheduledAt.toLocaleString()}.`;
 
     const result = await smsService.sendSms(appointment.patientId.phone, message);
+
+    // Persist an ad-hoc reminder record so providerMessageId can be tracked
+    try {
+      const resObj = result && result.result;
+      const messageId = resObj && resObj.SMSMessageData && resObj.SMSMessageData.Recipients && resObj.SMSMessageData.Recipients[0] && resObj.SMSMessageData.Recipients[0].messageId;
+
+      const reminder = new Reminder({
+        appointmentId: appointment._id,
+        patientPhone: appointment.patientId.phone,
+        scheduledSendAt: new Date(),
+        sentAt: new Date(),
+        status: 'sent',
+        offset: '2h', // ad-hoc
+        providerResponse: result,
+        providerMessageId: messageId
+      });
+      await reminder.save();
+    } catch (e) {
+      console.warn('Failed to persist ad-hoc reminder:', e.message || e);
+    }
 
     res.json({ success: true, result });
   } catch (error) {
