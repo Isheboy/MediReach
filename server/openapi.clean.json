@@ -1,0 +1,83 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "MediReach API (clean)",
+    "version": "1.0.0",
+    "description": "Compact OpenAPI spec for auth and appointments (clean copy)."
+  },
+  "servers": [{ "url": "http://localhost:5000" }],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "summary": "Register user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "phone"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "phone": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login by phone",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["phone"],
+                "properties": {
+                  "phone": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OK" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+    "/api/appointments": {
+      "post": {
+        "summary": "Create appointment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["facilityId", "service", "scheduledAt"],
+                "properties": {
+                  "facilityId": { "type": "string" },
+                  "service": { "type": "string" },
+                  "scheduledAt": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    }
+  }
+}

@@ -12,6 +12,42 @@ const smsRoutes = require("./routes/smsRoutes");
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Serve OpenAPI and Swagger UI
+let swaggerUi;
+try {
+  swaggerUi = require("swagger-ui-express");
+} catch (e) {
+  console.warn(
+    "swagger-ui-express not installed; /docs will be unavailable until you run npm install"
+  );
+}
+
+// Minimal OpenAPI spec embedded to avoid filesystem JSON issues
+const openapiSpec = {
+  openapi: "3.0.3",
+  info: {
+    title: "MediReach API (embedded)",
+    version: "1.0.0",
+    description: "Embedded minimal API spec for auth and appointments.",
+  },
+  servers: [{ url: `http://localhost:${PORT}` }],
+  paths: {
+    "/api/auth/register": { post: { summary: "Register user" } },
+    "/api/auth/login": { post: { summary: "Login by phone" } },
+    "/api/appointments": { post: { summary: "Create appointment" } },
+  },
+};
+
+// expose the embedded spec and mount swagger UI if available
+app.get("/openapi.json", (req, res) => res.json(openapiSpec));
+if (swaggerUi) {
+  app.use(
+    "/docs",
+    swaggerUi.serve,
+    swaggerUi.setup(openapiSpec, { explorer: true })
+  );
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
