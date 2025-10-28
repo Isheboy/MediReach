@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: oklch(100% 0 0);
+  --color-foreground: oklch(9% 0.006 285.885);
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(9% 0.006 285.885);
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(9% 0.006 285.885);
+  --color-primary: oklch(53% 0.213 264.376);
+  --color-primary-foreground: oklch(98% 0.002 285.885);
+  --color-secondary: oklch(96% 0.002 285.885);
+  --color-secondary-foreground: oklch(11% 0.01 285.885);
+  --color-muted: oklch(96% 0.002 285.885);
+  --color-muted-foreground: oklch(47% 0.004 285.885);
+  --color-accent: oklch(96% 0.002 285.885);
+  --color-accent-foreground: oklch(11% 0.01 285.885);
+  --color-destructive: oklch(60% 0.188 27.325);
+  --color-destructive-foreground: oklch(98% 0.002 285.885);
+  --color-border: oklch(91% 0.006 285.885);
+  --color-input: oklch(91% 0.006 285.885);
+  --color-ring: oklch(53% 0.213 264.376);
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-background: oklch(9% 0.006 285.885);
+    --color-foreground: oklch(98% 0.002 285.885);
+    --color-card: oklch(9% 0.006 285.885);
+    --color-card-foreground: oklch(98% 0.002 285.885);
+    --color-popover: oklch(9% 0.006 285.885);
+    --color-popover-foreground: oklch(98% 0.002 285.885);
+    --color-primary: oklch(60% 0.228 264.376);
+    --color-primary-foreground: oklch(11% 0.01 285.885);
+    --color-secondary: oklch(18% 0.015 285.885);
+    --color-secondary-foreground: oklch(98% 0.002 285.885);
+    --color-muted: oklch(18% 0.015 285.885);
+    --color-muted-foreground: oklch(65% 0.004 285.885);
+    --color-accent: oklch(18% 0.015 285.885);
+    --color-accent-foreground: oklch(98% 0.002 285.885);
+    --color-destructive: oklch(31% 0.146 27.325);
+    --color-destructive-foreground: oklch(98% 0.002 285.885);
+    --color-border: oklch(18% 0.015 285.885);
+    --color-input: oklch(18% 0.015 285.885);
+    --color-ring: oklch(48% 0.228 264.376);
+  }
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
