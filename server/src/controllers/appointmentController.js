@@ -1,8 +1,8 @@
-const Appointment = require('../models/Appointment');
-const User = require('../models/User');
-const Facility = require('../models/Facility');
-const reminderService = require('../services/reminderService');
-const smsService = require('../services/smsService');
+const Appointment = require("../models/Appointment");
+const User = require("../models/User");
+const Facility = require("../models/Facility");
+const reminderService = require("../services/reminderService");
+const smsService = require("../services/smsService");
 
 const createAppointment = async (req, res) => {
   try {
@@ -11,7 +11,7 @@ const createAppointment = async (req, res) => {
 
     const facility = await Facility.findById(facilityId);
     if (!facility) {
-      return res.status(404).json({ error: 'Facility not found' });
+      return res.status(404).json({ error: "Facility not found" });
     }
 
     const appointment = new Appointment({
@@ -19,18 +19,22 @@ const createAppointment = async (req, res) => {
       facilityId,
       service,
       scheduledAt: new Date(scheduledAt),
-      notes
+      notes,
     });
 
     await appointment.save();
 
     if (req.user.consentSms) {
-      await reminderService.scheduleReminders(appointment._id, req.user.phone, new Date(scheduledAt));
+      await reminderService.scheduleReminders(
+        appointment._id,
+        req.user.phone,
+        new Date(scheduledAt)
+      );
     }
 
     const populated = await Appointment.findById(appointment._id)
-      .populate('facilityId', 'name address contactNumber')
-      .populate('patientId', 'name phone');
+      .populate("facilityId", "name address contactNumber")
+      .populate("patientId", "name phone");
 
     res.status(201).json(populated);
   } catch (error) {
@@ -41,7 +45,7 @@ const createAppointment = async (req, res) => {
 const getPatientAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find({ patientId: req.user._id })
-      .populate('facilityId', 'name address contactNumber')
+      .populate("facilityId", "name address contactNumber")
       .sort({ scheduledAt: -1 });
 
     res.json(appointments);
@@ -54,12 +58,15 @@ const getFacilityAppointments = async (req, res) => {
   try {
     const { facilityId } = req.params;
 
-    if (req.user.role === 'staff' && req.user.facilityId.toString() !== facilityId) {
-      return res.status(403).json({ error: 'Access denied' });
+    if (
+      req.user.role === "staff" &&
+      req.user.facilityId.toString() !== facilityId
+    ) {
+      return res.status(403).json({ error: "Access denied" });
     }
 
     const appointments = await Appointment.find({ facilityId })
-      .populate('patientId', 'name phone')
+      .populate("patientId", "name phone")
       .sort({ scheduledAt: -1 });
 
     res.json(appointments);
@@ -75,15 +82,15 @@ const updateAppointmentStatus = async (req, res) => {
 
     const appointment = await Appointment.findById(id);
     if (!appointment) {
-      return res.status(404).json({ error: 'Appointment not found' });
+      return res.status(404).json({ error: "Appointment not found" });
     }
 
     appointment.status = status;
     await appointment.save();
 
     const populated = await Appointment.findById(id)
-      .populate('facilityId', 'name')
-      .populate('patientId', 'name phone');
+      .populate("facilityId", "name")
+      .populate("patientId", "name phone");
 
     res.json(populated);
   } catch (error) {
@@ -91,42 +98,67 @@ const updateAppointmentStatus = async (req, res) => {
   }
 };
 
-const Reminder = require('../models/Reminder');
+const Reminder = require("../models/Reminder");
 
 const sendTestSms = async (req, res) => {
   try {
     const { id } = req.params;
 
     const appointment = await Appointment.findById(id)
-      .populate('facilityId', 'name')
-      .populate('patientId', 'name phone');
+      .populate("facilityId", "name")
+      .populate("patientId", "name phone");
 
     if (!appointment) {
-      return res.status(404).json({ error: 'Appointment not found' });
+      return res.status(404).json({ error: "Appointment not found" });
     }
 
-    const message = `Test SMS: Hello ${appointment.patientId.name}, this is a test reminder for your appointment at ${appointment.facilityId.name} on ${appointment.scheduledAt.toLocaleString()}.`;
+    const message = `Test SMS: Hello ${
+      appointment.patientId.name
+    }, this is a test reminder for your appointment at ${
+      appointment.facilityId.name
+    } on ${appointment.scheduledAt.toLocaleString()}.`;
 
-    const result = await smsService.sendSms(appointment.patientId.phone, message);
+    const result = await smsService.sendSms(
+      appointment.patientId.phone,
+      message
+    );
 
-    // Persist an ad-hoc reminder record so providerMessageId can be tracked
+    // Persist an ad-hoc reminder record so providerMessageId can be tracked.
+    // Use an atomic upsert (findOneAndUpdate with upsert) to avoid duplicate-key errors
+    // if the same appointmentId+offset record already exists.
     try {
       const resObj = result && result.result;
-      const messageId = resObj && resObj.SMSMessageData && resObj.SMSMessageData.Recipients && resObj.SMSMessageData.Recipients[0] && resObj.SMSMessageData.Recipients[0].messageId;
+      const messageId =
+        resObj &&
+        resObj.SMSMessageData &&
+        resObj.SMSMessageData.Recipients &&
+        resObj.SMSMessageData.Recipients[0] &&
+        resObj.SMSMessageData.Recipients[0].messageId;
 
-      const reminder = new Reminder({
-        appointmentId: appointment._id,
-        patientPhone: appointment.patientId.phone,
-        scheduledSendAt: new Date(),
-        sentAt: new Date(),
-        status: 'sent',
-        offset: '2h', // ad-hoc
-        providerResponse: result,
-        providerMessageId: messageId
+      const filter = { appointmentId: appointment._id, offset: "2h" };
+      const update = {
+        $set: {
+          patientPhone: appointment.patientId.phone,
+          scheduledSendAt: new Date(),
+          sentAt: new Date(),
+          status: "sent",
+          providerResponse: result,
+          providerMessageId: messageId,
+        },
+        $setOnInsert: {
+          appointmentId: appointment._id,
+          offset: "2h",
+        },
+      };
+
+      await Reminder.findOneAndUpdate(filter, update, {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
       });
-      await reminder.save();
     } catch (e) {
-      console.warn('Failed to persist ad-hoc reminder:', e.message || e);
+      // If some other error occurs, log it. Duplicate key errors should be prevented by the upsert.
+      console.warn("Failed to persist ad-hoc reminder:", e.message || e);
     }
 
     res.json({ success: true, result });
@@ -140,5 +172,5 @@ module.exports = {
   getPatientAppointments,
   getFacilityAppointments,
   updateAppointmentStatus,
-  sendTestSms
+  sendTestSms,
 };

@@ -27,8 +27,8 @@ export default function Appointments() {
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [formData, setFormData] = useState({
-    patientName: "",
-    scheduledFor: "",
+    service: "",
+    scheduledAt: "",
     facilityId: "",
   });
   const [error, setError] = useState("");
@@ -65,9 +65,17 @@ export default function Appointments() {
     setError("");
 
     try {
-      await appointmentsAPI.create(formData);
+      // convert datetime-local local value to ISO if present
+      const payload = {
+        ...formData,
+        scheduledAt: formData.scheduledAt
+          ? new Date(formData.scheduledAt).toISOString()
+          : undefined,
+      };
+
+      await appointmentsAPI.create(payload);
       setShowCreateForm(false);
-      setFormData({ patientName: "", scheduledFor: "", facilityId: "" });
+      setFormData({ service: "", scheduledAt: "", facilityId: "" });
       fetchAppointments();
     } catch (error) {
       setError(error.response?.data?.message || "Failed to create appointment");
@@ -148,24 +156,24 @@ export default function Appointments() {
             <CardContent>
               <form onSubmit={handleCreateAppointment} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="patientName">Patient Name</Label>
+                  <Label htmlFor="service">Service / Reason</Label>
                   <Input
-                    id="patientName"
-                    value={formData.patientName}
+                    id="service"
+                    value={formData.service}
                     onChange={(e) =>
-                      setFormData({ ...formData, patientName: e.target.value })
+                      setFormData({ ...formData, service: e.target.value })
                     }
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="scheduledFor">Date & Time</Label>
+                  <Label htmlFor="scheduledAt">Date & Time</Label>
                   <Input
-                    id="scheduledFor"
+                    id="scheduledAt"
                     type="datetime-local"
-                    value={formData.scheduledFor}
+                    value={formData.scheduledAt}
                     onChange={(e) =>
-                      setFormData({ ...formData, scheduledFor: e.target.value })
+                      setFormData({ ...formData, scheduledAt: e.target.value })
                     }
                     required
                   />
@@ -214,7 +222,9 @@ export default function Appointments() {
                     <div className="flex items-center space-x-2">
                       <User className="h-5 w-5 text-gray-500" />
                       <CardTitle className="text-lg">
-                        {appointment.patientName}
+                        {appointment.patientId
+                          ? appointment.patientId.name
+                          : "Unknown patient"}
                       </CardTitle>
                     </div>
                     <span
@@ -230,19 +240,23 @@ export default function Appointments() {
                   <div className="flex items-center space-x-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
                     <span>
-                      {format(new Date(appointment.scheduledFor), "PPP")}
+                      {format(new Date(appointment.scheduledAt), "PPP")}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-sm text-gray-600">
                     <Clock className="h-4 w-4" />
                     <span>
-                      {format(new Date(appointment.scheduledFor), "p")}
+                      {format(new Date(appointment.scheduledAt), "p")}
                     </span>
                   </div>
-                  {appointment.facility && (
+                  {(appointment.facilityId || appointment.facility) && (
                     <div className="flex items-center space-x-2 text-sm text-gray-600">
                       <MapPin className="h-4 w-4" />
-                      <span>{appointment.facility.name}</span>
+                      <span>
+                        {appointment.facilityId
+                          ? appointment.facilityId.name
+                          : appointment.facility?.name}
+                      </span>
                     </div>
                   )}
                   <div className="pt-3 flex gap-2">
