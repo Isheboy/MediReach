@@ -20,6 +20,7 @@ import StaffAppointments from "@/pages/staff/Appointments";
 import StaffPatients from "@/pages/staff/Patients";
 import StaffFacilities from "@/pages/staff/Facilities";
 import StaffReports from "@/pages/staff/Reports";
+import StaffProfile from "@/pages/staff/Profile";
 import ManageFacilities from "@/pages/ManageFacilities";
 import BrowseFacilities from "@/pages/BrowseFacilities";
 import ReminderLogs from "@/pages/ReminderLogs";
@@ -104,6 +105,14 @@ function App() {
             element={
               <StaffRoute>
                 <StaffReports />
+              </StaffRoute>
+            }
+          />
+          <Route
+            path="/staff/profile"
+            element={
+              <StaffRoute>
+                <StaffProfile />
               </StaffRoute>
             }
           />

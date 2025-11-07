@@ -7,6 +7,7 @@ import {
   FileText,
   LogOut,
   Stethoscope,
+  User,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,11 @@ const StaffSidebar = () => {
       to: "/staff/reports",
       icon: FileText,
       label: "Reports",
+    },
+    {
+      to: "/staff/profile",
+      icon: User,
+      label: "My Profile",
     },
   ];
 

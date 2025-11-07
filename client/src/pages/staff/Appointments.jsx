@@ -79,6 +79,7 @@ const StaffAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filters
@@ -108,37 +109,54 @@ const StaffAppointments = () => {
 
   useEffect(() => {
     fetchAppointments();
-  }, [selectedDate]);
+
+    // Setup polling for real-time updates (every 30 seconds)
+    const pollInterval = setInterval(() => {
+      fetchAppointments();
+    }, 30000);
+
+    return () => clearInterval(pollInterval);
+  }, [selectedDate, statusFilter, specialistFilter, timeBlockFilter]);
 
   useEffect(() => {
     applyFilters();
-  }, [
-    appointments,
-    searchQuery,
-    statusFilter,
-    specialistFilter,
-    timeBlockFilter,
-  ]);
+  }, [appointments, searchQuery]);
 
   const fetchAppointments = async () => {
     try {
       setLoading(true);
+      setError(null);
+
       const startOfDay = new Date(selectedDate);
       startOfDay.setHours(0, 0, 0, 0);
 
       const endOfDay = new Date(selectedDate);
       endOfDay.setHours(23, 59, 59, 999);
 
-      const response = await api.get("/appointments", {
-        params: {
-          startDate: startOfDay.toISOString(),
-          endDate: endOfDay.toISOString(),
-        },
-      });
+      // Build query params dynamically
+      const params = {
+        startDate: startOfDay.toISOString(),
+        endDate: endOfDay.toISOString(),
+      };
+
+      if (statusFilter !== "all") {
+        params.status = statusFilter;
+      }
+
+      if (specialistFilter !== "all") {
+        params.specialist = specialistFilter;
+      }
+
+      if (timeBlockFilter !== "all") {
+        params.timeBlock = timeBlockFilter;
+      }
+
+      const response = await api.get("/appointments/staff", { params });
 
       setAppointments(response.data);
     } catch (error) {
       console.error("Error fetching appointments:", error);
+      setError("Failed to load appointments. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -147,7 +165,7 @@ const StaffAppointments = () => {
   const applyFilters = () => {
     let filtered = [...appointments];
 
-    // Search filter
+    // Search filter (client-side for immediate feedback)
     if (searchQuery) {
       filtered = filtered.filter(
         (apt) =>
@@ -159,65 +177,74 @@ const StaffAppointments = () => {
       );
     }
 
-    // Status filter
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((apt) => apt.status === statusFilter);
-    }
-
-    // Specialist filter
-    if (specialistFilter !== "all") {
-      filtered = filtered.filter((apt) => apt.specialist === specialistFilter);
-    }
-
-    // Time block filter
-    if (timeBlockFilter !== "all") {
-      filtered = filtered.filter((apt) => {
-        const hour = new Date(apt.date).getHours();
-        if (timeBlockFilter === "morning") return hour >= 6 && hour < 12;
-        if (timeBlockFilter === "afternoon") return hour >= 12 && hour < 17;
-        if (timeBlockFilter === "evening") return hour >= 17 && hour < 21;
-        return true;
-      });
-    }
-
     setFilteredAppointments(filtered);
   };
 
   const getStatusColor = (status) => {
     const colors = {
-      scheduled: "bg-blue-100 text-blue-800",
-      "checked-in": "bg-yellow-100 text-yellow-800",
+      pending: "bg-gray-100 text-gray-800",
+      confirmed: "bg-blue-100 text-blue-800",
       completed: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
+      canceled: "bg-red-100 text-red-800",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
 
   const handleCheckIn = async () => {
+    const appointmentId = checkInDialog.appointment._id;
+
     try {
-      await api.put(`/appointments/${checkInDialog.appointment._id}`, {
-        status: "checked-in",
-      });
+      // Optimistic update
+      setAppointments((prevAppointments) =>
+        prevAppointments.map((apt) =>
+          apt._id === appointmentId ? { ...apt, status: "confirmed" } : apt
+        )
+      );
 
       setCheckInDialog({ open: false, appointment: null });
-      fetchAppointments();
+
+      // Server update
+      await api.patch(`/appointments/${appointmentId}`, {
+        status: "confirmed",
+      });
+
+      // Re-fetch to confirm
+      await fetchAppointments();
     } catch (error) {
       console.error("Error checking in appointment:", error);
+      setError("Failed to check in appointment");
+      // Revert optimistic update on error
+      await fetchAppointments();
     }
   };
 
   const handleCancel = async () => {
+    const appointmentId = cancelDialog.appointment._id;
+
     try {
-      await api.put(`/appointments/${cancelDialog.appointment._id}`, {
-        status: "cancelled",
-        cancellationReason: cancelReason,
-      });
+      // Optimistic update
+      setAppointments((prevAppointments) =>
+        prevAppointments.map((apt) =>
+          apt._id === appointmentId ? { ...apt, status: "canceled" } : apt
+        )
+      );
 
       setCancelDialog({ open: false, appointment: null });
       setCancelReason("");
-      fetchAppointments();
+
+      // Server update
+      await api.patch(`/appointments/${appointmentId}`, {
+        status: "canceled",
+        cancellationReason: cancelReason,
+      });
+
+      // Re-fetch to confirm
+      await fetchAppointments();
     } catch (error) {
       console.error("Error cancelling appointment:", error);
+      setError("Failed to cancel appointment");
+      // Revert optimistic update on error
+      await fetchAppointments();
     }
   };
 
@@ -262,6 +289,13 @@ const StaffAppointments = () => {
 
         {/* Main Content */}
         <main className="p-8">
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+              <p className="text-sm font-medium text-destructive">{error}</p>
+            </div>
+          )}
+
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">

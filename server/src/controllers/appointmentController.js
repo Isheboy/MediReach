@@ -88,6 +88,88 @@ const getAllAppointments = async (req, res) => {
   }
 };
 
+// New dedicated endpoint for staff dashboard with filtering
+const getStaffAppointments = async (req, res) => {
+  try {
+    const { startDate, endDate, status, specialist, timeBlock } = req.query;
+
+    // Build query object
+    let query = {};
+
+    // Date filtering - default to current day if no dates provided
+    if (startDate && endDate) {
+      query.scheduledAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    } else {
+      // Default to today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      query.scheduledAt = {
+        $gte: today,
+        $lt: tomorrow,
+      };
+    }
+
+    // Status filtering
+    if (status && status !== "all") {
+      query.status = status;
+    }
+
+    // Service/Specialist filtering (using service field as specialist)
+    if (specialist && specialist !== "all") {
+      query.service = specialist;
+    }
+
+    // Fetch appointments with populated data
+    let appointments = await Appointment.find(query)
+      .populate("patientId", "name phone")
+      .populate("facilityId", "name address")
+      .sort({ scheduledAt: 1 });
+
+    // Time block filtering (client-side for now, could be optimized)
+    if (timeBlock && timeBlock !== "all") {
+      appointments = appointments.filter((apt) => {
+        const hour = new Date(apt.scheduledAt).getHours();
+        if (timeBlock === "morning") return hour >= 6 && hour < 12;
+        if (timeBlock === "afternoon") return hour >= 12 && hour < 17;
+        if (timeBlock === "evening") return hour >= 17 && hour < 21;
+        return true;
+      });
+    }
+
+    // Transform data to match frontend expectations
+    const transformedAppointments = appointments.map((apt) => ({
+      _id: apt._id,
+      date: apt.scheduledAt,
+      patient: {
+        _id: apt.patientId?._id,
+        name: apt.patientId?.name || "Unknown",
+        phone: apt.patientId?.phone || "N/A",
+      },
+      facility: {
+        _id: apt.facilityId?._id,
+        name: apt.facilityId?.name || "Unknown",
+        address: apt.facilityId?.address,
+      },
+      specialist: apt.service || "General",
+      status: apt.status,
+      notes: apt.notes,
+      createdAt: apt.createdAt,
+      updatedAt: apt.updatedAt,
+    }));
+
+    res.json(transformedAppointments);
+  } catch (error) {
+    console.error("Error fetching staff appointments:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const updateAppointmentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -185,6 +267,7 @@ module.exports = {
   getPatientAppointments,
   getFacilityAppointments,
   getAllAppointments,
+  getStaffAppointments,
   updateAppointmentStatus,
   sendTestSms,
 };

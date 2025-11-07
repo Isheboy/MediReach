@@ -43,13 +43,13 @@ const StaffDashboard = () => {
     try {
       setLoading(true);
 
-      // Fetch today's appointments
+      // Fetch today's appointments using the new staff endpoint
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const appointmentsRes = await api.get("/appointments", {
+      const appointmentsRes = await api.get("/appointments/staff", {
         params: {
           startDate: today.toISOString(),
           endDate: tomorrow.toISOString(),
@@ -61,8 +61,9 @@ const StaffDashboard = () => {
       // Calculate metrics
       setMetrics({
         todayAppointments: appointments.length,
-        upcomingTasks: appointments.filter((a) => a.status === "scheduled")
-          .length,
+        upcomingTasks: appointments.filter(
+          (a) => a.status === "pending" || a.status === "confirmed"
+        ).length,
         newRegistrations: 5, // Placeholder - would come from API
         totalPatients: 124, // Placeholder - would come from API
       });
@@ -78,10 +79,10 @@ const StaffDashboard = () => {
 
   const getStatusColor = (status) => {
     const colors = {
-      scheduled: "bg-blue-100 text-blue-800",
-      "checked-in": "bg-yellow-100 text-yellow-800",
+      pending: "bg-gray-100 text-gray-800",
+      confirmed: "bg-blue-100 text-blue-800",
       completed: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
+      canceled: "bg-red-100 text-red-800",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };

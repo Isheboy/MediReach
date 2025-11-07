@@ -77,10 +77,48 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
 
 #### 📊 **Staff Dashboard**
 
-- **Appointment Overview**: View all patient appointments
-- **Status Management**: Update appointment status (pending, confirmed, completed, cancelled)
-- **Facility Management**: CRUD operations for healthcare facilities
-- **Reminder Logs**: Monitor all sent SMS reminders
+- **Dashboard Overview**: Real-time metrics (Today's Appointments, Upcoming Tasks, New Registrations, Total Patients)
+- **Today's Schedule Widget**: Quick view of daily appointments with status badges
+- **Trending Analytics**: Visual indicators showing appointment trends
+
+#### 📅 **Appointments Management Center**
+
+- **Advanced DataTable**: Comprehensive appointment list with sorting and filtering
+- **Smart Filters**:
+  - Date Picker with calendar component
+  - Status filter (All, Pending, Confirmed, Completed, Canceled)
+  - Specialist/Service filter
+  - Time block filter (Morning, Afternoon, Evening)
+- **Real-time Updates**: Auto-refresh every 30 seconds to catch new bookings
+- **Global Search**: Instant search by patient name, phone, or facility
+- **Quick Actions**:
+  - Check-In patients
+  - View detailed appointment information
+  - Edit/Reschedule appointments
+  - Cancel with reason tracking
+- **Optimistic UI**: Instant feedback on actions with server confirmation
+- **Export Functionality**: Download appointment data
+
+#### 👤 **Staff Profile Management**
+
+- **Professional Profile Header**: Avatar, name, role, department, and status badges
+- **Tabbed Information Organization**:
+  - **Details & Contact**: Employee ID, contact information, emergency contacts
+  - **Credentials & Licensing**: DataTable for professional licenses and certifications with expiration tracking
+  - **Schedule & Availability**: Calendar view and recurring work schedule management
+- **Credential Management**: Add new credentials with document upload
+- **Password Management**: Secure password change functionality
+- **Availability Adjustment**: Update work hours and request time off
+
+#### 🏥 **Facility Management**
+
+- **Facility CRUD**: Create, read, update, and delete healthcare facilities
+- **Service Management**: Add and manage medical services offered
+
+#### 📈 **Reports & Analytics** (Coming Soon)
+
+- **Appointment Statistics**: Completion rates, patient satisfaction
+- **Custom Reports**: Generate and export various reports
 
 ---
 
@@ -95,6 +133,7 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
 | **React Router** | 6.28    | Client-side routing              |
 | **Tailwind CSS** | 4.1     | Utility-first styling framework  |
 | **shadcn/ui**    | Latest  | High-quality React components    |
+| **Radix UI**     | Latest  | Accessible component primitives  |
 | **Axios**        | 1.7     | HTTP client for API requests     |
 | **date-fns**     | 4.1     | Date formatting and manipulation |
 | **Lucide React** | Latest  | Icon library                     |
@@ -110,6 +149,13 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
 | **JWT**      | 9.0     | Authentication tokens     |
 | **bcryptjs** | 2.4     | Password hashing          |
 | **dotenv**   | 16.4    | Environment configuration |
+
+### Database
+
+| Provider          | Purpose                    |
+| ----------------- | -------------------------- |
+| **MongoDB**       | Local development database |
+| **MongoDB Atlas** | Cloud production database  |
 
 ### SMS Integration
 
@@ -161,8 +207,8 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
    PORT=5000
    NODE_ENV=development
 
-   # Database
-   MONGODB_URI=mongodb://localhost:27017/medireach
+   # Database (MongoDB Atlas)
+   MONGO_URI=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/medireach?retryWrites=true&w=majority
 
    # JWT Secret
    JWT_SECRET=your_jwt_secret_key_here
@@ -170,7 +216,7 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
    # Africa's Talking
    AT_USERNAME=your_at_username
    AT_API_KEY=your_at_api_key
-   AT_SENDER_ID=your_sender_id
+   AT_SENDER_ID=MediReach
 
    # Twilio (Optional)
    TWILIO_ACCOUNT_SID=your_twilio_account_sid
@@ -184,12 +230,13 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
    VITE_API_URL=http://localhost:5000
    ```
 
-5. **Seed the database** (Optional)
+5. **Database Setup**
 
-   ```bash
-   cd server
-   npm run seed
-   ```
+   The application uses **MongoDB Atlas** for cloud database:
+
+   - Connection string is already configured
+   - Database name: `medireach`
+   - Contains 30+ documents (users, facilities, appointments, reminders)
 
 6. **Start the development servers**
 
@@ -208,8 +255,9 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
    ```
 
 7. **Access the application**
-   - Frontend: http://localhost:3000
+   - Frontend: http://localhost:5173
    - Backend API: http://localhost:5000
+   - API Documentation: http://localhost:5000/docs (if Swagger is installed)
 
 ---
 
@@ -220,7 +268,29 @@ MediReach/
 ├── client/                    # React frontend
 │   ├── src/
 │   │   ├── components/        # React components
-│   │   │   ├── ui/            # shadcn/ui components
+│   │   │   ├── ui/            # shadcn/ui components (18 components)
+│   │   │   │   ├── accordion.jsx
+│   │   │   │   ├── alert-dialog.jsx
+│   │   │   │   ├── avatar.jsx
+│   │   │   │   ├── badge.jsx
+│   │   │   │   ├── button.jsx
+│   │   │   │   ├── calendar.jsx
+│   │   │   │   ├── card.jsx
+│   │   │   │   ├── command.jsx
+│   │   │   │   ├── dialog.jsx
+│   │   │   │   ├── dropdown-menu.jsx
+│   │   │   │   ├── input.jsx
+│   │   │   │   ├── label.jsx
+│   │   │   │   ├── popover.jsx
+│   │   │   │   ├── progress.jsx
+│   │   │   │   ├── select.jsx
+│   │   │   │   ├── separator.jsx
+│   │   │   │   ├── table.jsx
+│   │   │   │   ├── tabs.jsx
+│   │   │   │   ├── textarea.jsx
+│   │   │   │   └── toggle-group.jsx
+│   │   │   ├── staff/         # Staff-specific components
+│   │   │   │   └── StaffSidebar.jsx
 │   │   │   ├── AppointmentsTab.jsx
 │   │   │   ├── BookingWizard.jsx
 │   │   │   ├── FacilityForm.jsx
@@ -232,6 +302,13 @@ MediReach/
 │   │   │   ├── api.js         # API client
 │   │   │   └── utils.js       # Helper functions
 │   │   ├── pages/             # Page components
+│   │   │   ├── staff/         # Staff dashboard pages
+│   │   │   │   ├── Dashboard.jsx      # Staff overview
+│   │   │   │   ├── Appointments.jsx   # Appointments management
+│   │   │   │   ├── Patients.jsx       # Patient management
+│   │   │   │   ├── Facilities.jsx     # Facility management
+│   │   │   │   ├── Reports.jsx        # Reports & analytics
+│   │   │   │   └── Profile.jsx        # Staff profile
 │   │   │   ├── Home.jsx
 │   │   │   ├── Login.jsx
 │   │   │   ├── Register.jsx
@@ -246,7 +323,7 @@ MediReach/
 │   │   │   └── ReminderLogs.jsx
 │   │   ├── App.jsx            # Main app component
 │   │   ├── main.jsx           # Entry point
-│   │   └── index.css          # Global styles
+│   │   └── index.css          # Global styles (Tailwind v4)
 │   ├── package.json
 │   ├── vite.config.js
 │   └── tailwind.config.js
@@ -259,7 +336,8 @@ MediReach/
 │   │   │   ├── facilityController.js
 │   │   │   └── userController.js
 │   │   ├── middleware/        # Custom middleware
-│   │   │   └── auth.js
+│   │   │   ├── auth.js
+│   │   │   └── isStaff.js
 │   │   ├── models/            # Mongoose models
 │   │   │   ├── Appointment.js
 │   │   │   ├── Facility.js
@@ -272,7 +350,9 @@ MediReach/
 │   │   │   ├── reminderRoutes.js
 │   │   │   └── userRoutes.js
 │   │   ├── scripts/           # Utility scripts
-│   │   │   └── seed.js
+│   │   │   ├── seed.js
+│   │   │   ├── migrateToAtlas.js
+│   │   │   └── addStaffPasswords.js
 │   │   ├── services/          # Business logic
 │   │   │   ├── reminderService.js
 │   │   │   └── smsService.js
@@ -300,33 +380,66 @@ Content-Type: application/json
 
 {
   "name": "John Doe",
-  "email": "john@example.com",
-  "password": "password123",
-  "phoneNumber": "+255123456789",
+  "phone": "+255123456789",
   "role": "patient"
 }
 ```
 
-#### Login
+**Note:** Phone-based registration for patients. Staff/Admin accounts require password.
+
+#### Login (Patient - Phone Only)
 
 ```http
 POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "john@example.com",
-  "password": "password123"
+  "phone": "+255123456789"
 }
 ```
 
+#### Login (Staff/Admin - Phone + Password)
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "phone": "+255713456789",
+  "password": "staff123"
+}
+```
+
+**Staff Credentials for Testing:**
+
+- Nurse Peter Ndege: `+255754321098` / `staff123`
+- Dr. Grace Kimaro: `+255713456789` / `staff123`
+
 ### Appointment Endpoints
 
-#### Get User Appointments
+#### Get User Appointments (Patient)
 
 ```http
 GET /api/appointments
 Authorization: Bearer <token>
 ```
+
+#### Get Staff Appointments (Staff Dashboard)
+
+```http
+GET /api/appointments/staff?startDate=2025-11-07&endDate=2025-11-08&status=pending
+Authorization: Bearer <token>
+```
+
+**Query Parameters:**
+
+- `startDate` (optional): Start date for filtering (ISO 8601 format)
+- `endDate` (optional): End date for filtering (ISO 8601 format)
+- `status` (optional): Filter by status (pending, confirmed, completed, canceled, all)
+- `specialist` (optional): Filter by service/specialist type
+- `timeBlock` (optional): Filter by time (morning, afternoon, evening)
+
+**Note:** Defaults to current day if no dates provided
 
 #### Create Appointment
 
@@ -345,7 +458,7 @@ Content-Type: application/json
 #### Update Appointment Status
 
 ```http
-PATCH /api/appointments/:id/status
+PATCH /api/appointments/:id
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -411,17 +524,17 @@ Content-Type: application/json
 
 ### Server (.env)
 
-| Variable              | Description               | Required | Example                               |
-| --------------------- | ------------------------- | -------- | ------------------------------------- |
-| `PORT`                | Server port               | No       | `5000`                                |
-| `MONGODB_URI`         | MongoDB connection string | Yes      | `mongodb://localhost:27017/medireach` |
-| `JWT_SECRET`          | Secret for JWT signing    | Yes      | `your_secret_key`                     |
-| `AT_USERNAME`         | Africa's Talking username | Yes\*    | `sandbox`                             |
-| `AT_API_KEY`          | Africa's Talking API key  | Yes\*    | `your_api_key`                        |
-| `AT_SENDER_ID`        | Sender ID for SMS         | No       | `MediReach`                           |
-| `TWILIO_ACCOUNT_SID`  | Twilio Account SID        | No       | `ACxxxx`                              |
-| `TWILIO_AUTH_TOKEN`   | Twilio Auth Token         | No       | `your_token`                          |
-| `TWILIO_PHONE_NUMBER` | Twilio Phone Number       | No       | `+1234567890`                         |
+| Variable              | Description               | Required | Example             |
+| --------------------- | ------------------------- | -------- | ------------------- |
+| `PORT`                | Server port               | No       | `5000`              |
+| `MONGO_URI`           | MongoDB Atlas connection  | Yes      | `mongodb+srv://...` |
+| `JWT_SECRET`          | Secret for JWT signing    | Yes      | `your_secret_key`   |
+| `AT_USERNAME`         | Africa's Talking username | Yes\*    | `sandbox`           |
+| `AT_API_KEY`          | Africa's Talking API key  | Yes\*    | `your_api_key`      |
+| `AT_SENDER_ID`        | Sender ID for SMS         | No       | `MediReach`         |
+| `TWILIO_ACCOUNT_SID`  | Twilio Account SID        | No       | `ACxxxx`            |
+| `TWILIO_AUTH_TOKEN`   | Twilio Auth Token         | No       | `your_token`        |
+| `TWILIO_PHONE_NUMBER` | Twilio Phone Number       | No       | `+1234567890`       |
 
 \*Required if using Africa's Talking for SMS
 
@@ -447,13 +560,42 @@ MediReach follows **Medireach-style** design principles:
 ### Key UI Features
 
 - ✅ Sticky navigation with backdrop blur
-- ✅ Gradient backgrounds and accent colors
+- ✅ Gradient backgrounds and accent colors (Tailwind v4 syntax)
 - ✅ Interactive calendars and time slot selectors
 - ✅ DataTable with sorting and filtering (desktop)
-- ✅ Card-based layouts (mobile)
+- ✅ Card-based layouts for mobile responsiveness
 - ✅ Status badges with semantic colors
 - ✅ Modal dialogs for confirmations
 - ✅ Toast notifications for feedback
+- ✅ Real-time polling for live data updates
+- ✅ Optimistic UI updates for instant feedback
+- ✅ Avatar components with gradient fallbacks
+- ✅ Tabbed interfaces for organized information
+
+### shadcn/ui Components Used
+
+The application uses **20 shadcn/ui components**:
+
+1. Accordion
+2. Alert Dialog
+3. Avatar
+4. Badge
+5. Button
+6. Calendar
+7. Card
+8. Command
+9. Dialog
+10. Dropdown Menu
+11. Input
+12. Label
+13. Popover
+14. Progress
+15. Select
+16. Separator
+17. Table
+18. Tabs
+19. Textarea
+20. Toggle Group
 
 ---
 
@@ -461,16 +603,41 @@ MediReach follows **Medireach-style** design principles:
 
 ### Manual Testing Checklist
 
-- [ ] User registration and login
-- [ ] Appointment booking (all 3 steps)
+#### Patient Features
+
+- [ ] User registration (phone-based)
+- [ ] Patient login
+- [ ] Appointment booking (complete 3-step wizard)
 - [ ] View upcoming/past appointments
 - [ ] Reschedule appointment
 - [ ] Cancel appointment
 - [ ] Update profile information
 - [ ] Toggle SMS consent
 - [ ] Browse facilities
-- [ ] Staff login and dashboard
-- [ ] SMS reminder sending
+- [ ] Receive SMS reminders
+
+#### Staff Features
+
+- [ ] Staff login (phone + password)
+- [ ] View dashboard with metrics
+- [ ] View today's schedule
+- [ ] Filter appointments (date, status, specialist, time)
+- [ ] Search appointments (patient, phone, facility)
+- [ ] Check-in patient
+- [ ] View appointment details
+- [ ] Cancel appointment with reason
+- [ ] View staff profile
+- [ ] Manage credentials
+- [ ] View work schedule
+- [ ] Auto-refresh functionality (30s polling)
+
+#### System Features
+
+- [ ] Real-time data synchronization
+- [ ] Optimistic UI updates
+- [ ] Error handling and recovery
+- [ ] Mobile responsiveness
+- [ ] MongoDB Atlas cloud database connection
 
 ---
 
