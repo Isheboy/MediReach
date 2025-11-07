@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
 
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       return {
         success: false,
@@ -44,9 +44,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, phone, password) => {
+  const register = async (name, phone, password, consentSms) => {
     try {
-      const response = await authAPI.register({ name, phone, password });
+      const response = await authAPI.register({ name, phone, password, consentSms });
       const { token, user: userData } = response.data;
 
       localStorage.setItem("token", token);
@@ -63,6 +63,11 @@ export const AuthProvider = ({ children }) => {
           "Registration failed",
       };
     }
+  };
+
+  const updateUser = (newUserData) => {
+    localStorage.setItem("user", JSON.stringify(newUserData));
+    setUser(newUserData);
   };
 
   const logout = async () => {
@@ -86,6 +91,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!user,
   };
 

@@ -27,7 +27,7 @@ const register = async (req, res) => {
       phone,
       role: role || "patient",
       facilityId: role === "staff" ? facilityId : undefined,
-      consentSms: consentSms !== undefined ? consentSms : true,
+      consentSms: consentSms === true,
     });
 
     await user.save();

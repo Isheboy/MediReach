@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function Login() {
+export default function StaffLogin() {
   const [formData, setFormData] = useState({
     phone: "",
     password: "",
@@ -42,10 +42,10 @@ export default function Login() {
     const result = await login(formData.phone, formData.password);
 
     if (result.success) {
-      if (result.user.role === "staff" || result.user.role === "admin") {
-        navigate("/staff/dashboard");
-      } else {
+      if (result.user.role === "patient") {
         navigate("/appointments");
+      } else {
+        navigate("/staff/dashboard");
       }
     } else {
       setError(result.error);
@@ -63,10 +63,10 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Welcome back
+            Staff Login
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access your account
+            Enter your credentials to access the staff dashboard
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -106,14 +106,8 @@ export default function Login() {
               {loading ? "Signing in..." : "Login"}
             </Button>
             <p className="text-sm text-center text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-primary hover:underline">
-                Register here
-              </Link>
-            </p>
-            <p className="text-sm text-center text-muted-foreground">
-              Are you a staff member?{" "}
-              <Link to="/staff/login" className="text-primary hover:underline">
+              Are you a patient?{" "}
+              <Link to="/login" className="text-primary hover:underline">
                 Login here
               </Link>
             </p>

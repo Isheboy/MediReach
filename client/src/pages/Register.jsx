@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -18,11 +18,23 @@ export default function Register() {
     name: "",
     phone: "",
     password: "",
+    consentSms: true,
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === "staff" || user.role === "admin") {
+        navigate("/staff/dashboard", { replace: true });
+      } else {
+        navigate("/appointments", { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +44,8 @@ export default function Register() {
     const result = await register(
       formData.name,
       formData.phone,
-      formData.password
+      formData.password,
+      formData.consentSms
     );
 
     if (result.success) {
@@ -45,7 +58,8 @@ export default function Register() {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ ...formData, [name]: type === "checkbox" ? checked : value });
   };
 
   return (
@@ -101,6 +115,22 @@ export default function Register() {
                 onChange={handleChange}
                 required
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                id="consentSms"
+                name="consentSms"
+                type="checkbox"
+                checked={formData.consentSms}
+                onChange={handleChange}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <Label
+                htmlFor="consentSms"
+                className="text-sm font-normal text-muted-foreground"
+              >
+                I agree to receive SMS reminders for my appointments.
+              </Label>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">

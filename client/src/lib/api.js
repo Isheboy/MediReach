@@ -40,7 +40,12 @@ export const authAPI = {
   register: (data) => api.post("/api/auth/register", data),
   login: (data) => api.post("/api/auth/login", data),
   logout: (data) => api.post("/api/auth/logout", data),
-  getProfile: () => api.get("/api/auth/profile"),
+};
+
+// User API
+export const userAPI = {
+  getProfile: () => api.get("/api/users/profile"),
+  updateProfile: (data) => api.put("/api/users/profile", data),
 };
 
 // Facilities API
@@ -49,16 +54,23 @@ export const facilitiesAPI = {
   getById: (id) => api.get(`/api/facilities/${id}`),
   create: (data) => api.post("/api/facilities", data),
   update: (id, data) => api.put(`/api/facilities/${id}`, data),
+  delete: (id) => api.delete(`/api/facilities/${id}`),
 };
 
 // Appointments API
 export const appointmentsAPI = {
   getAll: () => api.get("/api/appointments"),
+  getAllForStaff: () => api.get("/api/appointments/all"),
   getById: (id) => api.get(`/api/appointments/${id}`),
   create: (data) => api.post("/api/appointments", data),
   updateStatus: (id, status) =>
     api.patch(`/api/appointments/${id}/status`, { status }),
   sendTestSMS: (id) => api.post(`/api/appointments/${id}/send-test-sms`),
+};
+
+// Reminders API
+export const remindersAPI = {
+  getAll: () => api.get("/api/reminders"),
 };
 
 export default api;

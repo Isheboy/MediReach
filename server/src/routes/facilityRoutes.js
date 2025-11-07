@@ -1,26 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const Facility = require('../models/Facility');
+const { getAllFacilities, getFacilityById, createFacility, updateFacility, deleteFacility } = require('../controllers/facilityController');
+const { auth } = require('../middleware/auth');
+const { isStaff } = require('../middleware/isStaff');
 
-router.get('/', async (req, res) => {
-  try {
-    const facilities = await Facility.find().sort({ name: 1 });
-    res.json(facilities);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Public routes
+router.get('/', getAllFacilities);
+router.get('/:id', getFacilityById);
 
-router.get('/:id', async (req, res) => {
-  try {
-    const facility = await Facility.findById(req.params.id);
-    if (!facility) {
-      return res.status(404).json({ error: 'Facility not found' });
-    }
-    res.json(facility);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Protected staff routes
+router.post('/', auth, isStaff, createFacility);
+router.put('/:id', auth, isStaff, updateFacility);
+router.delete('/:id', auth, isStaff, deleteFacility);
 
 module.exports = router;

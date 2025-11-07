@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { appointmentsAPI, facilitiesAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,6 @@ export default function Appointments() {
     facilityId: "",
   });
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchAppointments();
@@ -125,31 +124,66 @@ export default function Appointments() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-            <p className="text-gray-600 mt-1">
-              Manage your healthcare appointments
-            </p>
+        {/* Page Header - Responsive */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Appointments
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">
+                Manage your healthcare appointments
+              </p>
+            </div>
+            <Button
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className="w-full sm:w-auto"
+            >
+              {showCreateForm ? "Cancel" : "New Appointment"}
+            </Button>
           </div>
-          <Button onClick={() => setShowCreateForm(!showCreateForm)}>
-            {showCreateForm ? "Cancel" : "New Appointment"}
-          </Button>
+
+          {/* Navigation Links - Responsive Grid */}
+          <nav
+            className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3"
+            aria-label="Quick navigation"
+          >
+            <Link to="/facilities" className="w-full">
+              <Button variant="outline" className="w-full" size="sm">
+                Browse Facilities
+              </Button>
+            </Link>
+            <Link to="/profile" className="w-full">
+              <Button variant="outline" className="w-full" size="sm">
+                Profile
+              </Button>
+            </Link>
+            <Link to="/reminders" className="col-span-2 sm:col-span-1 w-full">
+              <Button variant="outline" className="w-full" size="sm">
+                Reminder History
+              </Button>
+            </Link>
+          </nav>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          <div
+            role="alert"
+            className="mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm sm:text-base"
+          >
             {error}
           </div>
         )}
 
         {showCreateForm && (
-          <Card className="mb-8">
+          <Card className="mb-6 sm:mb-8">
             <CardHeader>
-              <CardTitle>Create New Appointment</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-xl sm:text-2xl">
+                Create New Appointment
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base">
                 Schedule a new healthcare appointment
               </CardDescription>
             </CardHeader>
@@ -159,23 +193,28 @@ export default function Appointments() {
                   <Label htmlFor="service">Service / Reason</Label>
                   <Input
                     id="service"
+                    name="service"
                     value={formData.service}
                     onChange={(e) =>
                       setFormData({ ...formData, service: e.target.value })
                     }
+                    placeholder="e.g., General Checkup"
                     required
+                    aria-required="true"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="scheduledAt">Date & Time</Label>
                   <Input
                     id="scheduledAt"
+                    name="scheduledAt"
                     type="datetime-local"
                     value={formData.scheduledAt}
                     onChange={(e) =>
                       setFormData({ ...formData, scheduledAt: e.target.value })
                     }
                     required
+                    aria-required="true"
                   />
                 </div>
                 <div className="space-y-2">
@@ -185,8 +224,12 @@ export default function Appointments() {
                     onValueChange={(value) =>
                       setFormData({ ...formData, facilityId: value })
                     }
+                    required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger
+                      id="facilityId"
+                      aria-label="Select healthcare facility"
+                    >
                       <SelectValue placeholder="Select a facility" />
                     </SelectTrigger>
                     <SelectContent>
@@ -206,7 +249,7 @@ export default function Appointments() {
           </Card>
         )}
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {appointments.length === 0 ? (
             <div className="col-span-full text-center py-12 text-gray-500">
               No appointments found. Create your first appointment!
@@ -217,66 +260,76 @@ export default function Appointments() {
                 key={appointment._id}
                 className="hover:shadow-lg transition-shadow"
               >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-2">
-                      <User className="h-5 w-5 text-gray-500" />
-                      <CardTitle className="text-lg">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center space-x-2 min-w-0 flex-1">
+                      <User
+                        className="h-5 w-5 text-gray-500 flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                      <CardTitle className="text-base sm:text-lg truncate">
                         {appointment.patientId
                           ? appointment.patientId.name
                           : "Unknown patient"}
                       </CardTitle>
                     </div>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                      className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${getStatusColor(
                         appointment.status
                       )}`}
+                      aria-label={`Status: ${appointment.status}`}
                     >
                       {appointment.status}
                     </span>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Calendar className="h-4 w-4" />
+                  <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
+                    <Calendar
+                      className="h-4 w-4 flex-shrink-0"
+                      aria-hidden="true"
+                    />
                     <span>
                       {format(new Date(appointment.scheduledAt), "PPP")}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <Clock className="h-4 w-4" />
+                  <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
+                    <Clock
+                      className="h-4 w-4 flex-shrink-0"
+                      aria-hidden="true"
+                    />
                     <span>
                       {format(new Date(appointment.scheduledAt), "p")}
                     </span>
                   </div>
                   {(appointment.facilityId || appointment.facility) && (
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <MapPin className="h-4 w-4" />
-                      <span>
+                    <div className="flex items-start space-x-2 text-xs sm:text-sm text-gray-600">
+                      <MapPin
+                        className="h-4 w-4 flex-shrink-0 mt-0.5"
+                        aria-hidden="true"
+                      />
+                      <span className="break-words">
                         {appointment.facilityId
                           ? appointment.facilityId.name
                           : appointment.facility?.name}
                       </span>
                     </div>
                   )}
-                  <div className="pt-3 flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleSendTestSMS(appointment._id)}
-                      className="flex-1"
-                    >
-                      Send SMS
-                    </Button>
-                    {appointment.status === "pending" && (
+                  <div className="pt-3 flex flex-col sm:flex-row gap-2">
+                    {appointment.status !== "cancelled" && (
                       <Button
+                        variant="destructive"
                         size="sm"
                         onClick={() =>
-                          handleUpdateStatus(appointment._id, "confirmed")
+                          handleUpdateStatus(appointment._id, "cancelled")
                         }
-                        className="flex-1"
+                        className="w-full sm:flex-1"
+                        aria-label={`Cancel appointment on ${format(
+                          new Date(appointment.scheduledAt),
+                          "PPP"
+                        )}`}
                       >
-                        Confirm
+                        Cancel
                       </Button>
                     )}
                   </div>

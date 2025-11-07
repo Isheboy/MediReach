@@ -75,6 +75,19 @@ const getFacilityAppointments = async (req, res) => {
   }
 };
 
+const getAllAppointments = async (req, res) => {
+  try {
+    const appointments = await Appointment.find({})
+      .populate("patientId", "name phone")
+      .populate("facilityId", "name")
+      .sort({ scheduledAt: -1 });
+
+    res.json(appointments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const updateAppointmentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -171,6 +184,7 @@ module.exports = {
   createAppointment,
   getPatientAppointments,
   getFacilityAppointments,
+  getAllAppointments,
   updateAppointmentStatus,
   sendTestSms,
 };

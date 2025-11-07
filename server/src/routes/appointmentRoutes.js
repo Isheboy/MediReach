@@ -4,6 +4,7 @@ const { auth } = require("../middleware/auth");
 const {
   createAppointment,
   getPatientAppointments,
+  getAllAppointments,
   getFacilityAppointments,
   updateAppointmentStatus,
   sendTestSms,
@@ -14,8 +15,11 @@ const {
 } = require("../validators/appointmentValidators");
 const { validate } = require("../middleware/validate");
 
+const { isStaff } = require("../middleware/isStaff");
+
 router.post("/", auth, createAppointmentValidator, validate, createAppointment);
 router.get("/", auth, getPatientAppointments);
+router.get("/all", auth, isStaff, getAllAppointments);
 router.get("/facility/:facilityId", auth, getFacilityAppointments);
 router.patch(
   "/:id",
