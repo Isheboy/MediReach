@@ -264,7 +264,7 @@ export default function Appointments() {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center space-x-2 min-w-0 flex-1">
                       <User
-                        className="h-5 w-5 text-gray-500 flex-shrink-0"
+                        className="h-5 w-5 text-gray-500 shrink-0"
                         aria-hidden="true"
                       />
                       <CardTitle className="text-base sm:text-lg truncate">
@@ -285,19 +285,13 @@ export default function Appointments() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
-                    <Calendar
-                      className="h-4 w-4 flex-shrink-0"
-                      aria-hidden="true"
-                    />
+                    <Calendar className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>
                       {format(new Date(appointment.scheduledAt), "PPP")}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
-                    <Clock
-                      className="h-4 w-4 flex-shrink-0"
-                      aria-hidden="true"
-                    />
+                    <Clock className="h-4 w-4 shrink-0" aria-hidden="true" />
                     <span>
                       {format(new Date(appointment.scheduledAt), "p")}
                     </span>
@@ -305,10 +299,10 @@ export default function Appointments() {
                   {(appointment.facilityId || appointment.facility) && (
                     <div className="flex items-start space-x-2 text-xs sm:text-sm text-gray-600">
                       <MapPin
-                        className="h-4 w-4 flex-shrink-0 mt-0.5"
+                        className="h-4 w-4 shrink-0 mt-0.5"
                         aria-hidden="true"
                       />
-                      <span className="break-words">
+                      <span className="wrap-break-word">
                         {appointment.facilityId
                           ? appointment.facilityId.name
                           : appointment.facility?.name}
