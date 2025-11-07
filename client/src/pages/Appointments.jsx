@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { appointmentsAPI, facilitiesAPI } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -11,328 +9,252 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Calendar, Clock, MapPin, User } from "lucide-react";
-import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import BookingWizard from "@/components/BookingWizard";
+import { Calendar, Clock, MapPin, User, ArrowLeft } from "lucide-react";
+import { format, isPast } from "date-fns";
 
 export default function Appointments() {
   const [appointments, setAppointments] = useState([]);
-  const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [formData, setFormData] = useState({
-    service: "",
-    scheduledAt: "",
-    facilityId: "",
-  });
-  const [error, setError] = useState("");
+  const [showBookingWizard, setShowBookingWizard] = useState(false);
+  const [activeTab, setActiveTab] = useState("upcoming");
 
   useEffect(() => {
     fetchAppointments();
-    fetchFacilities();
   }, []);
 
   const fetchAppointments = async () => {
     try {
       const response = await appointmentsAPI.getAll();
-      setAppointments(response.data);
+      setAppointments(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Error fetching appointments:", error);
-      setError("Failed to load appointments");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchFacilities = async () => {
-    try {
-      const response = await facilitiesAPI.getAll();
-      setFacilities(response.data);
-    } catch (error) {
-      console.error("Error fetching facilities:", error);
-    }
+  const handleBookingComplete = () => {
+    setShowBookingWizard(false);
+    fetchAppointments();
   };
 
-  const handleCreateAppointment = async (e) => {
-    e.preventDefault();
-    setError("");
+  const upcomingAppointments = appointments.filter(
+    (apt) =>
+      !isPast(new Date(apt.scheduledAt)) &&
+      apt.status !== "cancelled" &&
+      apt.status !== "completed"
+  );
 
-    try {
-      // convert datetime-local local value to ISO if present
-      const payload = {
-        ...formData,
-        scheduledAt: formData.scheduledAt
-          ? new Date(formData.scheduledAt).toISOString()
-          : undefined,
-      };
+  const pastAppointments = appointments.filter(
+    (apt) =>
+      isPast(new Date(apt.scheduledAt)) ||
+      apt.status === "cancelled" ||
+      apt.status === "completed"
+  );
 
-      await appointmentsAPI.create(payload);
-      setShowCreateForm(false);
-      setFormData({ service: "", scheduledAt: "", facilityId: "" });
-      fetchAppointments();
-    } catch (error) {
-      setError(error.response?.data?.message || "Failed to create appointment");
-    }
-  };
-
-  const handleUpdateStatus = async (id, status) => {
-    try {
-      await appointmentsAPI.updateStatus(id, status);
-      fetchAppointments();
-    } catch (error) {
-      console.error("Error updating appointment:", error);
-    }
-  };
-
-  const handleSendTestSMS = async (id) => {
-    try {
-      await appointmentsAPI.sendTestSMS(id);
-      alert("Test SMS sent successfully!");
-    } catch (error) {
-      alert(
-        "Failed to send SMS: " +
-          (error.response?.data?.message || error.message)
-      );
-    }
-  };
-
-  const getStatusColor = (status) => {
+  const getStatusVariant = (status) => {
     switch (status) {
       case "confirmed":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "default";
       case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "destructive";
       case "completed":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "secondary";
       default:
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "outline";
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading appointments...</div>
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-blue-50 to-white">
+        <div className="text-lg text-slate-600">Loading appointments...</div>
+      </div>
+    );
+  }
+
+  if (showBookingWizard) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-blue-50 to-white p-4 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => setShowBookingWizard(false)}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Appointments
+          </Button>
+        </div>
+        <BookingWizard onComplete={handleBookingComplete} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+    <div className="min-h-screen bg-linear-to-b from-blue-50 to-white p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Page Header - Responsive */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Appointments
+              <h1 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                My Appointments
               </h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-1">
-                Manage your healthcare appointments
+              <p className="text-slate-600 mt-2">
+                Manage and track your healthcare appointments
               </p>
             </div>
             <Button
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              className="w-full sm:w-auto"
+              onClick={() => setShowBookingWizard(true)}
+              size="lg"
+              className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >
-              {showCreateForm ? "Cancel" : "New Appointment"}
+              <Calendar className="mr-2 h-5 w-5" />
+              Book New Appointment
             </Button>
           </div>
 
-          {/* Navigation Links - Responsive Grid */}
-          <nav
-            className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3"
-            aria-label="Quick navigation"
-          >
-            <Link to="/facilities" className="w-full">
-              <Button variant="outline" className="w-full" size="sm">
+          {/* Quick Navigation */}
+          <div className="flex flex-wrap gap-2">
+            <Link to="/facilities">
+              <Button variant="outline" size="sm">
                 Browse Facilities
               </Button>
             </Link>
-            <Link to="/profile" className="w-full">
-              <Button variant="outline" className="w-full" size="sm">
-                Profile
+            <Link to="/profile">
+              <Button variant="outline" size="sm">
+                My Profile
               </Button>
             </Link>
-            <Link to="/reminders" className="col-span-2 sm:col-span-1 w-full">
-              <Button variant="outline" className="w-full" size="sm">
-                Reminder History
+            <Link to="/reminders">
+              <Button variant="outline" size="sm">
+                SMS History
               </Button>
             </Link>
-          </nav>
+          </div>
         </div>
 
-        {error && (
-          <div
-            role="alert"
-            className="mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm sm:text-base"
-          >
-            {error}
-          </div>
-        )}
+        {/* Appointments Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+            <TabsTrigger value="upcoming">
+              Upcoming ({upcomingAppointments.length})
+            </TabsTrigger>
+            <TabsTrigger value="past">
+              Past ({pastAppointments.length})
+            </TabsTrigger>
+          </TabsList>
 
-        {showCreateForm && (
-          <Card className="mb-6 sm:mb-8">
-            <CardHeader>
-              <CardTitle className="text-xl sm:text-2xl">
-                Create New Appointment
-              </CardTitle>
-              <CardDescription className="text-sm sm:text-base">
-                Schedule a new healthcare appointment
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleCreateAppointment} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="service">Service / Reason</Label>
-                  <Input
-                    id="service"
-                    name="service"
-                    value={formData.service}
-                    onChange={(e) =>
-                      setFormData({ ...formData, service: e.target.value })
-                    }
-                    placeholder="e.g., General Checkup"
-                    required
-                    aria-required="true"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="scheduledAt">Date & Time</Label>
-                  <Input
-                    id="scheduledAt"
-                    name="scheduledAt"
-                    type="datetime-local"
-                    value={formData.scheduledAt}
-                    onChange={(e) =>
-                      setFormData({ ...formData, scheduledAt: e.target.value })
-                    }
-                    required
-                    aria-required="true"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="facilityId">Facility</Label>
-                  <Select
-                    value={formData.facilityId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, facilityId: value })
-                    }
-                    required
+          <TabsContent value="upcoming" className="space-y-4">
+            {upcomingAppointments.length === 0 ? (
+              <Card className="border-2 border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <Calendar className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                    No upcoming appointments
+                  </h3>
+                  <p className="text-slate-600 text-center mb-6 max-w-md">
+                    Schedule your first appointment to get started with your
+                    healthcare journey
+                  </p>
+                  <Button
+                    onClick={() => setShowBookingWizard(true)}
+                    className="bg-linear-to-r from-blue-600 to-indigo-600"
                   >
-                    <SelectTrigger
-                      id="facilityId"
-                      aria-label="Select healthcare facility"
-                    >
-                      <SelectValue placeholder="Select a facility" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {facilities.map((facility) => (
-                        <SelectItem key={facility._id} value={facility._id}>
-                          {facility.name} - {facility.location}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button type="submit" className="w-full">
-                  Create Appointment
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {appointments.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-gray-500">
-              No appointments found. Create your first appointment!
-            </div>
-          ) : (
-            appointments.map((appointment) => (
-              <Card
-                key={appointment._id}
-                className="hover:shadow-lg transition-shadow"
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center space-x-2 min-w-0 flex-1">
-                      <User
-                        className="h-5 w-5 text-gray-500 shrink-0"
-                        aria-hidden="true"
-                      />
-                      <CardTitle className="text-base sm:text-lg truncate">
-                        {appointment.patientId
-                          ? appointment.patientId.name
-                          : "Unknown patient"}
-                      </CardTitle>
-                    </div>
-                    <span
-                      className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${getStatusColor(
-                        appointment.status
-                      )}`}
-                      aria-label={`Status: ${appointment.status}`}
-                    >
-                      {appointment.status}
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
-                    <Calendar className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    <span>
-                      {format(new Date(appointment.scheduledAt), "PPP")}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
-                    <Clock className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    <span>
-                      {format(new Date(appointment.scheduledAt), "p")}
-                    </span>
-                  </div>
-                  {(appointment.facilityId || appointment.facility) && (
-                    <div className="flex items-start space-x-2 text-xs sm:text-sm text-gray-600">
-                      <MapPin
-                        className="h-4 w-4 shrink-0 mt-0.5"
-                        aria-hidden="true"
-                      />
-                      <span className="wrap-break-word">
-                        {appointment.facilityId
-                          ? appointment.facilityId.name
-                          : appointment.facility?.name}
-                      </span>
-                    </div>
-                  )}
-                  <div className="pt-3 flex flex-col sm:flex-row gap-2">
-                    {appointment.status !== "cancelled" && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() =>
-                          handleUpdateStatus(appointment._id, "cancelled")
-                        }
-                        className="w-full sm:flex-1"
-                        aria-label={`Cancel appointment on ${format(
-                          new Date(appointment.scheduledAt),
-                          "PPP"
-                        )}`}
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                  </div>
+                    Book Appointment
+                  </Button>
                 </CardContent>
               </Card>
-            ))
-          )}
-        </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {upcomingAppointments.map((appointment) => (
+                  <AppointmentCard
+                    key={appointment._id}
+                    appointment={appointment}
+                    getStatusVariant={getStatusVariant}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="past" className="space-y-4">
+            {pastAppointments.length === 0 ? (
+              <Card className="border-2 border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                    <Clock className="h-8 w-8 text-slate-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                    No past appointments
+                  </h3>
+                  <p className="text-slate-600 text-center">
+                    Your appointment history will appear here
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {pastAppointments.map((appointment) => (
+                  <AppointmentCard
+                    key={appointment._id}
+                    appointment={appointment}
+                    getStatusVariant={getStatusVariant}
+                    isPast
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
+  );
+}
+
+// Appointment Card Component
+function AppointmentCard({ appointment, getStatusVariant, isPast = false }) {
+  return (
+    <Card className="hover:shadow-lg transition-all duration-200 border-2 hover:border-blue-200">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <CardTitle className="text-lg">{appointment.service}</CardTitle>
+            <CardDescription className="mt-1">
+              {appointment.facilityId?.name || "Unknown Facility"}
+            </CardDescription>
+          </div>
+          <Badge variant={getStatusVariant(appointment.status)}>
+            {appointment.status}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Separator />
+        <div className="flex items-center gap-2 text-sm text-slate-600">
+          <Calendar className="h-4 w-4 text-blue-600" />
+          <span>{format(new Date(appointment.scheduledAt), "PPP")}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-slate-600">
+          <Clock className="h-4 w-4 text-blue-600" />
+          <span>{format(new Date(appointment.scheduledAt), "p")}</span>
+        </div>
+        {appointment.facilityId?.location && (
+          <div className="flex items-start gap-2 text-sm text-slate-600">
+            <MapPin className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+            <span className="line-clamp-2">
+              {appointment.facilityId.location}
+            </span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

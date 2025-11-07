@@ -63,6 +63,7 @@ export const appointmentsAPI = {
   getAllForStaff: () => api.get("/api/appointments/all"),
   getById: (id) => api.get(`/api/appointments/${id}`),
   create: (data) => api.post("/api/appointments", data),
+  update: (id, data) => api.put(`/api/appointments/${id}`, data),
   updateStatus: (id, status) =>
     api.patch(`/api/appointments/${id}/status`, { status }),
   sendTestSMS: (id) => api.post(`/api/appointments/${id}/send-test-sms`),
