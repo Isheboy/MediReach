@@ -15,9 +15,12 @@ import Register from "@/pages/Register";
 import Appointments from "@/pages/Appointments";
 import Profile from "@/pages/Profile";
 import ReminderHistory from "@/pages/ReminderHistory";
-import StaffDashboard from "@/pages/StaffDashboard";
+import StaffDashboard from "@/pages/staff/Dashboard";
+import StaffAppointments from "@/pages/staff/Appointments";
+import StaffPatients from "@/pages/staff/Patients";
+import StaffFacilities from "@/pages/staff/Facilities";
+import StaffReports from "@/pages/staff/Reports";
 import ManageFacilities from "@/pages/ManageFacilities";
-import ManageAppointments from "@/pages/ManageAppointments";
 import BrowseFacilities from "@/pages/BrowseFacilities";
 import ReminderLogs from "@/pages/ReminderLogs";
 
@@ -73,18 +76,34 @@ function App() {
             }
           />
           <Route
-            path="/staff/facilities"
+            path="/staff/appointments"
             element={
               <StaffRoute>
-                <ManageFacilities />
+                <StaffAppointments />
               </StaffRoute>
             }
           />
           <Route
-            path="/staff/appointments"
+            path="/staff/patients"
             element={
               <StaffRoute>
-                <ManageAppointments />
+                <StaffPatients />
+              </StaffRoute>
+            }
+          />
+          <Route
+            path="/staff/facilities"
+            element={
+              <StaffRoute>
+                <StaffFacilities />
+              </StaffRoute>
+            }
+          />
+          <Route
+            path="/staff/reports"
+            element={
+              <StaffRoute>
+                <StaffReports />
               </StaffRoute>
             }
           />

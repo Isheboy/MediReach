@@ -51,12 +51,27 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { phone } = req.body;
+    const { phone, password } = req.body;
 
     const user = await User.findOne({ phone }).populate("facilityId");
     if (!user) {
       return res.status(401).json({ error: "Invalid phone number" });
     }
+
+    // If user is staff/admin, require password
+    if (user.role === "staff" || user.role === "admin") {
+      if (!password) {
+        return res
+          .status(401)
+          .json({ error: "Password is required for staff login" });
+      }
+
+      const isPasswordValid = await user.comparePassword(password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: "Invalid password" });
+      }
+    }
+    // For patients, no password required (phone-only authentication)
 
     const token = generateToken(user);
 
@@ -65,6 +80,7 @@ const login = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        email: user.email,
         phone: user.phone,
         role: user.role,
         facilityId: user.facilityId,
