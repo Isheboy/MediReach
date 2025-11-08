@@ -146,16 +146,21 @@ const StaffProfile = () => {
       <div className="flex-1 overflow-auto">
         {/* Header */}
         <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/60">
-          <div className="flex h-16 items-center gap-4 px-8">
+          <div className="flex h-16 items-center gap-4 px-4 lg:px-8">
+            {/* Mobile spacing for hamburger menu */}
+            <div className="lg:hidden w-10" />
+
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-foreground">My Profile</h1>
-              <p className="text-sm text-muted-foreground">
+              <h1 className="text-xl lg:text-2xl font-bold text-foreground">
+                My Profile
+              </h1>
+              <p className="text-xs lg:text-sm text-muted-foreground">
                 Manage your professional information and credentials
               </p>
             </div>
 
             {/* Global Search */}
-            <div className="relative w-96">
+            <div className="relative hidden md:block w-64 lg:w-96">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search..."
@@ -168,27 +173,27 @@ const StaffProfile = () => {
         </header>
 
         {/* Main Content */}
-        <main className="p-8">
+        <main className="p-4 lg:p-8">
           {/* Profile Header Card */}
           <Card className="mb-6">
             <CardContent className="pt-6">
-              <div className="flex items-start gap-6">
+              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                 {/* Avatar */}
-                <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
+                <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-background shadow-lg">
                   <AvatarImage src="" alt={staffData.name} />
-                  <AvatarFallback className="bg-linear-to-r from-blue-500 to-teal-400 text-2xl font-bold text-white">
+                  <AvatarFallback className="bg-linear-to-r from-blue-500 to-teal-400 text-xl sm:text-2xl font-bold text-white">
                     {getInitials(staffData.name)}
                   </AvatarFallback>
                 </Avatar>
 
                 {/* Basic Info */}
-                <div className="flex-1">
-                  <div className="mb-2 flex items-start justify-between">
+                <div className="flex-1 w-full">
+                  <div className="mb-2 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div>
-                      <h2 className="text-2xl font-bold text-foreground">
+                      <h2 className="text-xl sm:text-2xl font-bold text-foreground">
                         {staffData.name}
                       </h2>
-                      <p className="text-lg text-muted-foreground">
+                      <p className="text-base sm:text-lg text-muted-foreground">
                         {staffData.role} • {staffData.department}
                       </p>
                     </div>
@@ -196,10 +201,11 @@ const StaffProfile = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => setEditBasicInfoOpen(true)}
-                      className="gap-2"
+                      className="gap-2 w-full sm:w-auto"
                     >
                       <Edit className="h-4 w-4" />
-                      Edit Basic Info
+                      <span className="hidden sm:inline">Edit Basic Info</span>
+                      <span className="sm:hidden">Edit Info</span>
                     </Button>
                   </div>
 
@@ -230,13 +236,22 @@ const StaffProfile = () => {
 
           {/* Tabbed Content */}
           <Tabs defaultValue="details" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="details">Details & Contact</TabsTrigger>
-              <TabsTrigger value="credentials">
-                Credentials & Licensing
+            <TabsList className="grid w-full grid-cols-3 h-auto">
+              <TabsTrigger value="details" className="text-xs sm:text-sm">
+                <span className="hidden sm:inline">Details & Contact</span>
+                <span className="sm:hidden">Details</span>
               </TabsTrigger>
-              <TabsTrigger value="schedule">
-                Schedule & Availability
+              <TabsTrigger value="credentials" className="text-xs sm:text-sm">
+                <span className="hidden sm:inline">
+                  Credentials & Licensing
+                </span>
+                <span className="sm:hidden">Credentials</span>
+              </TabsTrigger>
+              <TabsTrigger value="schedule" className="text-xs sm:text-sm">
+                <span className="hidden sm:inline">
+                  Schedule & Availability
+                </span>
+                <span className="sm:hidden">Schedule</span>
               </TabsTrigger>
             </TabsList>
 
@@ -320,7 +335,7 @@ const StaffProfile = () => {
             <TabsContent value="credentials" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                       <CardTitle>Professional Credentials</CardTitle>
                       <CardDescription>
@@ -330,10 +345,13 @@ const StaffProfile = () => {
                     </div>
                     <Button
                       onClick={() => setAddCredentialOpen(true)}
-                      className="gap-2 bg-linear-to-r from-blue-500 to-teal-400 text-white hover:opacity-90"
+                      className="gap-2 bg-linear-to-r from-blue-500 to-teal-400 text-white hover:opacity-90 w-full sm:w-auto"
                     >
                       <Plus className="h-4 w-4" />
-                      Add New Credential
+                      <span className="hidden sm:inline">
+                        Add New Credential
+                      </span>
+                      <span className="sm:hidden">Add Credential</span>
                     </Button>
                   </div>
                 </CardHeader>
@@ -461,7 +479,7 @@ const StaffProfile = () => {
                 {/* Work Schedule */}
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div>
                         <CardTitle>Recurring Work Schedule</CardTitle>
                         <CardDescription>
@@ -472,10 +490,13 @@ const StaffProfile = () => {
                         onClick={() => setAdjustAvailabilityOpen(true)}
                         variant="outline"
                         size="sm"
-                        className="gap-2"
+                        className="gap-2 w-full sm:w-auto"
                       >
                         <Edit className="h-4 w-4" />
-                        Adjust Availability
+                        <span className="hidden sm:inline">
+                          Adjust Availability
+                        </span>
+                        <span className="sm:hidden">Edit Schedule</span>
                       </Button>
                     </div>
                   </CardHeader>

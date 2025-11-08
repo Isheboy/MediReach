@@ -94,16 +94,21 @@ const StaffDashboard = () => {
       <div className="flex-1 overflow-auto">
         {/* Header */}
         <header className="sticky top-0 z-10 border-b bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/60">
-          <div className="flex h-16 items-center gap-4 px-8">
+          <div className="flex h-16 items-center gap-4 px-4 lg:px-8">
+            {/* Mobile spacing for hamburger menu */}
+            <div className="lg:hidden w-10" />
+
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-              <p className="text-sm text-muted-foreground">
+              <h1 className="text-xl lg:text-2xl font-bold text-foreground">
+                Dashboard
+              </h1>
+              <p className="text-xs lg:text-sm text-muted-foreground">
                 {format(new Date(), "EEEE, MMMM d, yyyy")}
               </p>
             </div>
 
             {/* Global Search */}
-            <div className="relative w-96">
+            <div className="relative w-full max-w-sm lg:w-96">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search patients, appointments..."
@@ -116,9 +121,9 @@ const StaffDashboard = () => {
         </header>
 
         {/* Main Content */}
-        <main className="p-8">
+        <main className="p-4 lg:p-8">
           {/* Metrics Grid */}
-          <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
             {/* Today's Appointments */}
             <Card className="border-l-4 border-l-blue-500">
               <CardHeader className="flex flex-row items-center justify-between pb-2">

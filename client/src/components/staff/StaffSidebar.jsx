@@ -8,13 +8,17 @@ import {
   LogOut,
   Stethoscope,
   User,
+  Menu,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 const StaffSidebar = () => {
   const { user, logout } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems = [
     {
@@ -49,8 +53,9 @@ const StaffSidebar = () => {
     },
   ];
 
-  return (
-    <div className="flex h-screen w-64 flex-col border-r bg-card">
+  // Sidebar Content Component (shared between desktop and mobile)
+  const SidebarContent = ({ onLinkClick }) => (
+    <>
       {/* Logo & Brand */}
       <div className="flex h-16 items-center gap-2 border-b px-6">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-r from-blue-500 to-teal-400">
@@ -91,6 +96,7 @@ const StaffSidebar = () => {
           <NavLink
             key={item.to}
             to={item.to}
+            onClick={onLinkClick}
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
@@ -117,13 +123,44 @@ const StaffSidebar = () => {
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
-          onClick={logout}
+          onClick={() => {
+            logout();
+            onLinkClick?.();
+          }}
         >
           <LogOut className="h-5 w-5" />
           <span>Logout</span>
         </Button>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile Trigger Button */}
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden fixed top-4 left-4 z-40"
+          >
+            <Menu className="h-6 w-6" />
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-64 p-0">
+          <div className="flex h-full flex-col bg-card">
+            <SidebarContent onLinkClick={() => setMobileOpen(false)} />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex h-screen w-64 flex-col border-r bg-card">
+        <SidebarContent />
+      </div>
+    </>
   );
 };
 
