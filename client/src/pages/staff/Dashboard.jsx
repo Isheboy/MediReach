@@ -8,6 +8,8 @@ import {
   TrendingUp,
   Activity,
   Search,
+  AlertCircle,
+  Bell,
 } from "lucide-react";
 import {
   Card,
@@ -30,6 +32,7 @@ const StaffDashboard = () => {
     upcomingTasks: 0,
     newRegistrations: 0,
     totalPatients: 0,
+    pendingAppointments: 0,
   });
   const [todaySchedule, setTodaySchedule] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,35 +46,56 @@ const StaffDashboard = () => {
     try {
       setLoading(true);
 
-      // Fetch today's appointments using the new staff endpoint
+      // Fetch today's appointments
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const appointmentsRes = await api.get("/appointments/staff", {
+      const todayAppointmentsRes = await api.get("/api/appointments/staff", {
         params: {
           startDate: today.toISOString(),
           endDate: tomorrow.toISOString(),
         },
       });
 
-      const appointments = appointmentsRes.data;
+      const todayAppointments = todayAppointmentsRes.data;
+
+      // Fetch ALL pending appointments (not just today's)
+      const allPendingRes = await api.get("/api/appointments/staff", {
+        params: {
+          status: "pending",
+        },
+      });
+
+      const pendingAppointments = allPendingRes.data;
+
+      // Debug logging
+      console.log("📊 Dashboard Data Fetched:");
+      console.log("Today's Appointments:", todayAppointments);
+      console.log("Pending Appointments (ALL):", pendingAppointments);
+      console.log("Pending Count:", pendingAppointments.length);
 
       // Calculate metrics
       setMetrics({
-        todayAppointments: appointments.length,
-        upcomingTasks: appointments.filter(
+        todayAppointments: todayAppointments.length,
+        upcomingTasks: todayAppointments.filter(
           (a) => a.status === "pending" || a.status === "confirmed"
         ).length,
+        pendingAppointments: pendingAppointments.length, // Total pending count
         newRegistrations: 5, // Placeholder - would come from API
         totalPatients: 124, // Placeholder - would come from API
       });
 
       // Set today's schedule (first 5 appointments)
-      setTodaySchedule(appointments.slice(0, 5));
+      setTodaySchedule(todayAppointments.slice(0, 5));
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      console.error("❌ Error fetching dashboard data:", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
     } finally {
       setLoading(false);
     }
@@ -122,8 +146,80 @@ const StaffDashboard = () => {
 
         {/* Main Content */}
         <main className="p-4 lg:p-8">
+          {/* Pending Appointments Alert Banner */}
+          {metrics.pendingAppointments > 0 && (
+            <div className="mb-6 animate-in fade-in-50 slide-in-from-top-5 duration-500">
+              <div className="rounded-lg border-2 border-red-500 bg-red-50 p-4 shadow-lg">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-500 animate-pulse">
+                    <Bell className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-red-900">
+                      {metrics.pendingAppointments} New Appointment
+                      {metrics.pendingAppointments !== 1 ? "s" : ""} Awaiting
+                      Your Review
+                    </h3>
+                    <p className="text-sm text-red-700">
+                      Patients have booked appointments that need your
+                      confirmation. Click below to review and accept them.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() =>
+                      navigate("/staff/appointments?filter=pending")
+                    }
+                    className="shrink-0 bg-red-600 hover:bg-red-700 text-white gap-2"
+                    size="lg"
+                  >
+                    <AlertCircle className="h-5 w-5" />
+                    Review Now
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Metrics Grid */}
           <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+            {/* Pending Appointments - NEW PRIORITY METRIC */}
+            <Card
+              className={`border-l-4 ${
+                metrics.pendingAppointments > 0
+                  ? "border-l-red-500 bg-red-50/50"
+                  : "border-l-gray-500"
+              }`}
+            >
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Pending Approvals
+                </CardTitle>
+                <Bell
+                  className={`h-5 w-5 ${
+                    metrics.pendingAppointments > 0
+                      ? "text-red-500 animate-pulse"
+                      : "text-gray-500"
+                  }`}
+                />
+              </CardHeader>
+              <CardContent>
+                <div
+                  className={`text-3xl font-bold ${
+                    metrics.pendingAppointments > 0
+                      ? "text-red-600"
+                      : "text-foreground"
+                  }`}
+                >
+                  {metrics.pendingAppointments}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {metrics.pendingAppointments > 0
+                    ? "Require immediate action"
+                    : "All caught up!"}
+                </p>
+              </CardContent>
+            </Card>
+
             {/* Today's Appointments */}
             <Card className="border-l-4 border-l-blue-500">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -159,22 +255,6 @@ const StaffDashboard = () => {
                 <p className="mt-1 text-xs text-muted-foreground">
                   Scheduled for today
                 </p>
-              </CardContent>
-            </Card>
-
-            {/* New Registrations */}
-            <Card className="border-l-4 border-l-teal-500">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  New Registrations
-                </CardTitle>
-                <UserPlus className="h-5 w-5 text-teal-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">
-                  {metrics.newRegistrations}
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">This week</p>
               </CardContent>
             </Card>
 

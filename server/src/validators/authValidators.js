@@ -28,9 +28,16 @@ const loginValidator = [
   body("phone")
     .trim()
     .notEmpty()
-    .withMessage("phone is required")
-    .matches(/^[+]?\d{7,15}$/)
-    .withMessage("phone must be a valid phone number in E.164-like format"),
+    .withMessage("phone or email is required")
+    .custom((value) => {
+      // Accept either email format or phone format
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+      const isPhone = /^[+]?\d{7,15}$/.test(value);
+      if (!isEmail && !isPhone) {
+        throw new Error("Must be a valid email or phone number");
+      }
+      return true;
+    }),
 ];
 
 module.exports = { registerValidator, loginValidator };

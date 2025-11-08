@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   Calendar as CalendarIcon,
   Filter,
@@ -10,6 +11,7 @@ import {
   Download,
   Search,
   Clock,
+  AlertCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -76,15 +78,18 @@ import api from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const StaffAppointments = () => {
+  const [searchParams] = useSearchParams();
   const [appointments, setAppointments] = useState([]);
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Filters
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [statusFilter, setStatusFilter] = useState("all");
+  // Filters - Check URL params for initial filter value
+  const [selectedDate, setSelectedDate] = useState(null); // No date filter by default
+  const [statusFilter, setStatusFilter] = useState(
+    searchParams.get("filter") || "all"
+  );
   const [specialistFilter, setSpecialistFilter] = useState("all");
   const [timeBlockFilter, setTimeBlockFilter] = useState("all");
 
@@ -127,17 +132,20 @@ const StaffAppointments = () => {
       setLoading(true);
       setError(null);
 
-      const startOfDay = new Date(selectedDate);
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const endOfDay = new Date(selectedDate);
-      endOfDay.setHours(23, 59, 59, 999);
-
       // Build query params dynamically
-      const params = {
-        startDate: startOfDay.toISOString(),
-        endDate: endOfDay.toISOString(),
-      };
+      const params = {};
+
+      // Only add date filter if a specific date is selected
+      if (selectedDate) {
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        params.startDate = startOfDay.toISOString();
+        params.endDate = endOfDay.toISOString();
+      }
 
       if (statusFilter !== "all") {
         params.status = statusFilter;
@@ -151,12 +159,29 @@ const StaffAppointments = () => {
         params.timeBlock = timeBlockFilter;
       }
 
-      const response = await api.get("/appointments/staff", { params });
+      const response = await api.get("/api/appointments/staff", { params });
+
+      console.log("✅ Appointments fetched successfully:", response.data);
+      console.log("Total appointments:", response.data.length);
 
       setAppointments(response.data);
     } catch (error) {
-      console.error("Error fetching appointments:", error);
-      setError("Failed to load appointments. Please try again.");
+      console.error("❌ Error fetching appointments:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      console.error("Error message:", error.message);
+
+      // Show specific error message
+      if (error.response?.status === 403) {
+        setError("Access denied. Please ensure you're logged in as staff.");
+      } else if (error.response?.status === 401) {
+        setError("Unauthorized. Please log in again.");
+      } else {
+        setError(
+          error.response?.data?.error ||
+            "Failed to load appointments. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -182,16 +207,18 @@ const StaffAppointments = () => {
 
   const getStatusColor = (status) => {
     const colors = {
-      pending: "bg-gray-100 text-gray-800",
-      confirmed: "bg-blue-100 text-blue-800",
-      completed: "bg-green-100 text-green-800",
-      canceled: "bg-red-100 text-red-800",
+      pending:
+        "bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200", // Amber for pending - requires action
+      confirmed: "bg-blue-100 text-blue-900 border-blue-300",
+      completed: "bg-green-100 text-green-900 border-green-300",
+      cancelled: "bg-gray-100 text-gray-900 border-gray-300",
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
 
   const handleCheckIn = async () => {
     const appointmentId = checkInDialog.appointment._id;
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
 
     try {
       // Optimistic update
@@ -203,9 +230,10 @@ const StaffAppointments = () => {
 
       setCheckInDialog({ open: false, appointment: null });
 
-      // Server update
-      await api.patch(`/appointments/${appointmentId}`, {
+      // Server update with staffId assignment for pending appointments
+      await api.patch(`/api/appointments/${appointmentId}/status`, {
         status: "confirmed",
+        staffId: user._id || user.id, // Assign current staff to appointment
       });
 
       // Re-fetch to confirm
@@ -233,7 +261,7 @@ const StaffAppointments = () => {
       setCancelReason("");
 
       // Server update
-      await api.patch(`/appointments/${appointmentId}`, {
+      await api.patch(`/api/appointments/${appointmentId}`, {
         status: "canceled",
         cancellationReason: cancelReason,
       });
@@ -294,8 +322,44 @@ const StaffAppointments = () => {
         <main className="p-8">
           {/* Error Alert */}
           {error && (
-            <div className="mb-6 rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+            <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
               <p className="text-sm font-medium text-destructive">{error}</p>
+            </div>
+          )}
+
+          {/* Pending Appointments Alert */}
+          {appointments.filter((apt) => apt.status === "pending").length >
+            0 && (
+            <div className="rounded-lg border-2 border-amber-400 bg-amber-50 p-4 shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500">
+                  <AlertCircle className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-amber-900">
+                    {
+                      appointments.filter((apt) => apt.status === "pending")
+                        .length
+                    }{" "}
+                    Pending Appointment
+                    {appointments.filter((apt) => apt.status === "pending")
+                      .length !== 1
+                      ? "s"
+                      : ""}{" "}
+                    Require Action
+                  </h3>
+                  <p className="text-sm text-amber-700">
+                    New appointments are waiting for your review and
+                    confirmation.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setStatusFilter("pending")}
+                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                >
+                  View Pending
+                </Button>
+              </div>
             </div>
           )}
 
@@ -327,7 +391,7 @@ const StaffAppointments = () => {
                       {selectedDate ? (
                         format(selectedDate, "PPP")
                       ) : (
-                        <span>Pick a date</span>
+                        <span>All Dates</span>
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -338,6 +402,18 @@ const StaffAppointments = () => {
                       onSelect={setSelectedDate}
                       initialFocus
                     />
+                    {selectedDate && (
+                      <div className="p-3 border-t">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => setSelectedDate(null)}
+                        >
+                          Clear Date Filter
+                        </Button>
+                      </div>
+                    )}
                   </PopoverContent>
                 </Popover>
 
@@ -432,7 +508,14 @@ const StaffAppointments = () => {
                     </TableHeader>
                     <TableBody>
                       {filteredAppointments.map((appointment) => (
-                        <TableRow key={appointment._id}>
+                        <TableRow
+                          key={appointment._id}
+                          className={
+                            appointment.status === "pending"
+                              ? "bg-amber-50/50 hover:bg-amber-100/50 border-l-4 border-l-amber-500"
+                              : "hover:bg-muted/50"
+                          }
+                        >
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
                               <Clock className="h-4 w-4 text-muted-foreground" />
@@ -468,6 +551,19 @@ const StaffAppointments = () => {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
+                                {appointment.status === "pending" && (
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      setCheckInDialog({
+                                        open: true,
+                                        appointment,
+                                      })
+                                    }
+                                  >
+                                    <CheckCircle className="mr-2 h-4 w-4 text-blue-600" />
+                                    Accept & Confirm
+                                  </DropdownMenuItem>
+                                )}
                                 {appointment.status === "scheduled" && (
                                   <DropdownMenuItem
                                     onClick={() =>
@@ -536,17 +632,33 @@ const StaffAppointments = () => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Check In Patient</AlertDialogTitle>
+            <AlertDialogTitle>
+              {checkInDialog.appointment?.status === "pending"
+                ? "Accept & Confirm Appointment"
+                : "Check In Patient"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to check in{" "}
-              {checkInDialog.appointment?.patient?.name}? This will update the
-              appointment status to "Checked In".
+              {checkInDialog.appointment?.status === "pending" ? (
+                <>
+                  Are you sure you want to accept and confirm the appointment
+                  for {checkInDialog.appointment?.patient?.name}? This will
+                  update the status to "Confirmed".
+                </>
+              ) : (
+                <>
+                  Are you sure you want to check in{" "}
+                  {checkInDialog.appointment?.patient?.name}? This will update
+                  the appointment status to "Confirmed".
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleCheckIn}>
-              Confirm Check-In
+              {checkInDialog.appointment?.status === "pending"
+                ? "Accept & Confirm"
+                : "Confirm Check-In"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

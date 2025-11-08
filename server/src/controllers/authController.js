@@ -53,9 +53,18 @@ const login = async (req, res) => {
   try {
     const { phone, password } = req.body;
 
-    const user = await User.findOne({ phone }).populate("facilityId");
+    // Try to find user by phone OR email
+    let user;
+    if (phone.includes("@")) {
+      // If input contains @, treat as email
+      user = await User.findOne({ email: phone }).populate("facilityId");
+    } else {
+      // Otherwise treat as phone number
+      user = await User.findOne({ phone }).populate("facilityId");
+    }
+
     if (!user) {
-      return res.status(401).json({ error: "Invalid phone number" });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     // If user is staff/admin, require password
@@ -67,6 +76,7 @@ const login = async (req, res) => {
       }
 
       const isPasswordValid = await user.comparePassword(password);
+
       if (!isPasswordValid) {
         return res.status(401).json({ error: "Invalid password" });
       }

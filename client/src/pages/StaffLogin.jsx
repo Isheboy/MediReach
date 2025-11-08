@@ -77,12 +77,12 @@ export default function StaffLogin() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">Email or Phone Number</Label>
               <Input
                 id="phone"
                 name="phone"
-                type="tel"
-                placeholder="+254700000000"
+                type="text"
+                placeholder="nurse@medireach.com or +255700000000"
                 value={formData.phone}
                 onChange={handleChange}
                 required

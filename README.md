@@ -200,30 +200,41 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
 
 4. **Configure environment variables**
 
-   Create `.env` in the `server` directory:
+   Create `.env` in the `server` directory (see `.env.example` for reference):
 
    ```env
    # Server Configuration
    PORT=5000
    NODE_ENV=development
 
-   # Database (MongoDB Atlas)
-   # SECURITY: Never commit real credentials! Use environment variables.
-   MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/medireach?retryWrites=true&w=majority
+   # Database Configuration
+   # Get your MongoDB Atlas connection string from: https://cloud.mongodb.com
+   # Replace <username>, <password>, and <cluster> with your actual credentials
+   MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>?retryWrites=true&w=majority
 
-   # JWT Secret
-   JWT_SECRET=your_jwt_secret_key_here
+   # JWT Authentication
+   # Generate a secure random string (e.g., using: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
+   JWT_SECRET=<your_secure_random_string>
 
-   # Africa's Talking
-   AT_USERNAME=your_at_username
-   AT_API_KEY=your_at_api_key
+   # SMS Provider Configuration (Africa's Talking)
+   # Sign up at: https://africastalking.com
+   AT_USERNAME=<your_africastalking_username>
+   AT_API_KEY=<your_africastalking_api_key>
    AT_SENDER_ID=MediReach
 
-   # Twilio (Optional)
-   TWILIO_ACCOUNT_SID=your_twilio_account_sid
-   TWILIO_AUTH_TOKEN=your_twilio_auth_token
-   TWILIO_PHONE_NUMBER=your_twilio_phone_number
+   # Alternative SMS Provider (Twilio) - Optional
+   # Sign up at: https://www.twilio.com
+   TWILIO_ACCOUNT_SID=<your_twilio_sid>
+   TWILIO_AUTH_TOKEN=<your_twilio_token>
+   TWILIO_PHONE_NUMBER=<your_twilio_number>
    ```
+
+   **⚠️ SECURITY WARNING:**
+
+   - **NEVER** commit your `.env` file to version control
+   - **NEVER** share your API keys or database credentials publicly
+   - Use environment-specific `.env` files (development, staging, production)
+   - Add `.env` to your `.gitignore` (already configured)
 
    Create `.env` in the `client` directory:
 
@@ -233,11 +244,22 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
 
 5. **Database Setup**
 
-   The application uses **MongoDB Atlas** for cloud database:
+   The application uses **MongoDB Atlas** for cloud database hosting:
 
-   - Connection string is already configured
+   - Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+   - Create a database user with read/write permissions
+   - Whitelist your IP address (or use 0.0.0.0/0 for development only)
+   - Copy your connection string and add it to `.env` as `MONGO_URI`
    - Database name: `medireach`
-   - Contains 30+ documents (users, facilities, appointments, reminders)
+
+   **Initial Data Seeding** (Optional):
+
+   ```bash
+   cd server
+   node src/scripts/seed.js
+   ```
+
+   This will populate your database with sample facilities and test users.
 
 6. **Start the development servers**
 
@@ -399,22 +421,37 @@ Content-Type: application/json
 }
 ```
 
-#### Login (Staff/Admin - Phone + Password)
+#### Login (Staff/Admin - Email/Phone + Password)
 
 ```http
 POST /api/auth/login
 Content-Type: application/json
 
 {
-  "phone": "+255713456789",
-  "password": "staff123"
+  "phone": "nurse@medireach.com",
+  "password": "password123"
 }
 ```
 
-**Staff Credentials for Testing:**
+**OR**
 
-- Nurse Peter Ndege: `+255754321098` / `staff123`
-- Dr. Grace Kimaro: `+255713456789` / `staff123`
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "phone": "+255754321098",
+  "password": "password123"
+}
+```
+
+**Test Staff Credentials:**
+
+- **Nurse Peter Ndege**:
+  - Email: `nurse@medireach.com`
+  - Phone: `+255754321098`
+  - Password: `password123`
+  - Role: `staff`
 
 ### Appointment Endpoints
 
@@ -597,6 +634,38 @@ The application uses **20 shadcn/ui components**:
 18. Tabs
 19. Textarea
 20. Toggle Group
+
+---
+
+## 📝 Recent Updates
+
+### Version 1.1.0 (November 2025)
+
+#### ✨ New Features
+
+- **Staff Dual Authentication**: Staff can now login using either email or phone number
+- **Enhanced Appointment Filtering**: Removed default date filtering to show all appointments by default
+- **Improved UX Design**: Updated notification colors from red to amber/orange for better visual hierarchy
+
+#### 🐛 Bug Fixes
+
+- **Fixed Staff Login**: Resolved bcrypt double-hashing issue that prevented staff authentication
+- **Fixed Appointment Display**: Staff appointments now show all dates by default instead of only today
+- **Fixed Password Validation**: Corrected password comparison logic in authentication flow
+
+#### 🎨 UI/UX Improvements
+
+- **Amber Notification Theme**: Changed pending appointments from red to amber for less alarming appearance
+- **Table Row Highlighting**: Added left border accent on pending appointment rows
+- **Better Status Badges**: Updated badge colors for better semantic meaning
+- **Notification Banner**: Redesigned with amber color scheme and improved contrast
+
+#### 🔧 Technical Improvements
+
+- **Cleaned Debug Code**: Removed all console.log debugging statements from production code
+- **Removed Test Files**: Cleaned up temporary test scripts and PowerShell files
+- **Better Error Messages**: Enhanced error handling with specific user-facing messages
+- **Code Organization**: Improved code structure and removed unused imports
 
 ---
 

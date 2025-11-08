@@ -96,24 +96,14 @@ const getStaffAppointments = async (req, res) => {
     // Build query object
     let query = {};
 
-    // Date filtering - default to current day if no dates provided
+    // Date filtering - only filter if dates are explicitly provided
     if (startDate && endDate) {
       query.scheduledAt = {
         $gte: new Date(startDate),
         $lte: new Date(endDate),
       };
-    } else {
-      // Default to today
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
-      query.scheduledAt = {
-        $gte: today,
-        $lt: tomorrow,
-      };
     }
+    // If no date filter provided, show ALL appointments (don't default to today)
 
     // Status filtering
     if (status && status !== "all") {
@@ -129,6 +119,7 @@ const getStaffAppointments = async (req, res) => {
     let appointments = await Appointment.find(query)
       .populate("patientId", "name phone")
       .populate("facilityId", "name address")
+      .populate("staffId", "name role")
       .sort({ scheduledAt: 1 });
 
     // Time block filtering (client-side for now, could be optimized)
@@ -156,6 +147,13 @@ const getStaffAppointments = async (req, res) => {
         name: apt.facilityId?.name || "Unknown",
         address: apt.facilityId?.address,
       },
+      staff: apt.staffId
+        ? {
+            _id: apt.staffId._id,
+            name: apt.staffId.name,
+            role: apt.staffId.role,
+          }
+        : null,
       specialist: apt.service || "General",
       status: apt.status,
       notes: apt.notes,
@@ -173,7 +171,7 @@ const getStaffAppointments = async (req, res) => {
 const updateAppointmentStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, staffId } = req.body;
 
     const appointment = await Appointment.findById(id);
     if (!appointment) {
@@ -181,11 +179,18 @@ const updateAppointmentStatus = async (req, res) => {
     }
 
     appointment.status = status;
+
+    // Assign staff when accepting/confirming pending appointment
+    if (staffId && appointment.status === "pending" && status === "confirmed") {
+      appointment.staffId = staffId;
+    }
+
     await appointment.save();
 
     const populated = await Appointment.findById(id)
       .populate("facilityId", "name")
-      .populate("patientId", "name phone");
+      .populate("patientId", "name phone")
+      .populate("staffId", "name role");
 
     res.json(populated);
   } catch (error) {
