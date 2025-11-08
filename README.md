@@ -208,7 +208,8 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
    NODE_ENV=development
 
    # Database (MongoDB Atlas)
-   MONGO_URI=mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/medireach?retryWrites=true&w=majority
+   # SECURITY: Never commit real credentials! Use environment variables.
+   MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/medireach?retryWrites=true&w=majority
 
    # JWT Secret
    JWT_SECRET=your_jwt_secret_key_here
