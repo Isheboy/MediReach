@@ -212,36 +212,65 @@ const StaffAppointments = () => {
       confirmed: "bg-blue-100 text-blue-900 border-blue-300",
       completed: "bg-green-100 text-green-900 border-green-300",
       cancelled: "bg-gray-100 text-gray-900 border-gray-300",
+      reschedule_pending_patient:
+        "bg-purple-100 text-purple-900 border-purple-300", // Staff proposed, awaiting patient
+      pending_staff_review: "bg-orange-100 text-orange-900 border-orange-300", // Patient requested, awaiting staff
     };
     return colors[status] || "bg-gray-100 text-gray-800";
   };
 
+  const getStatusLabel = (status) => {
+    const labels = {
+      pending: "Pending",
+      confirmed: "Confirmed",
+      completed: "Completed",
+      cancelled: "Cancelled",
+      reschedule_pending_patient: "Reschedule (Awaiting Patient)",
+      pending_staff_review: "Reschedule (Awaiting Staff)",
+    };
+    return labels[status] || status;
+  };
+
   const handleCheckIn = async () => {
     const appointmentId = checkInDialog.appointment._id;
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const appointmentService =
+      checkInDialog.appointment.specialist || "Appointment";
 
     try {
-      // Optimistic update
-      setAppointments((prevAppointments) =>
-        prevAppointments.map((apt) =>
-          apt._id === appointmentId ? { ...apt, status: "confirmed" } : apt
-        )
-      );
-
       setCheckInDialog({ open: false, appointment: null });
 
-      // Server update with staffId assignment for pending appointments
-      await api.patch(`/api/appointments/${appointmentId}/status`, {
-        status: "confirmed",
-        staffId: user._id || user.id, // Assign current staff to appointment
-      });
+      // Use the new confirm endpoint
+      const response = await api.post(
+        `/api/appointments/${appointmentId}/confirm`
+      );
 
-      // Re-fetch to confirm
+      console.log("✅ Appointment confirmed:", response.data);
+
+      // Show success message
+      alert(
+        `✅ ${appointmentService} confirmed successfully! Patient has been notified.`
+      );
+
+      // If we're filtering by pending, the confirmed appointment will disappear
+      // This is expected behavior - switch to "all" to see it
+      if (statusFilter === "pending") {
+        console.log(
+          "💡 Tip: Switch filter to 'All Statuses' to see confirmed appointment"
+        );
+      }
+
+      // Re-fetch to get updated data
       await fetchAppointments();
     } catch (error) {
-      console.error("Error checking in appointment:", error);
-      setError("Failed to check in appointment");
-      // Revert optimistic update on error
+      console.error("❌ Error confirming appointment:", error);
+      console.error("Error details:", error.response?.data);
+
+      const errorMessage =
+        error.response?.data?.error || "Failed to confirm appointment";
+      setError(errorMessage);
+      alert(`❌ ${errorMessage}`);
+
+      // Re-fetch to ensure UI is in sync
       await fetchAppointments();
     }
   };
@@ -538,7 +567,7 @@ const StaffAppointments = () => {
                             <Badge
                               className={getStatusColor(appointment.status)}
                             >
-                              {appointment.status}
+                              {getStatusLabel(appointment.status)}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">

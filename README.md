@@ -92,12 +92,21 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
 - **Real-time Updates**: Auto-refresh every 30 seconds to catch new bookings
 - **Global Search**: Instant search by patient name, phone, or facility
 - **Quick Actions**:
-  - Check-In patients
+  - Check-In patients (confirm appointments with automatic notifications)
   - View detailed appointment information
   - Edit/Reschedule appointments
   - Cancel with reason tracking
 - **Optimistic UI**: Instant feedback on actions with server confirmation
 - **Export Functionality**: Download appointment data
+
+#### 🔄 **Appointment Workflow Management**
+
+- **Confirmation System**: One-click appointment confirmation with automatic patient notification
+- **Staff-Initiated Rescheduling**: Propose new appointment times when schedules change
+- **Approval Workflow**: Review and respond to patient reschedule requests
+- **Availability Validation**: Automatic conflict checking prevents double-booking
+- **Reschedule History**: Complete audit trail of all appointment changes
+- **Multi-Channel Notifications**: SMS notifications for all workflow actions (email and push ready for future)
 
 #### 👤 **Staff Profile Management**
 
@@ -638,6 +647,44 @@ The application uses **20 shadcn/ui components**:
 ---
 
 ## 📝 Recent Updates
+
+### Version 1.2.0 (November 2025)
+
+#### ✨ New Features
+
+- **Staff Appointment Confirmation**: Healthcare staff can now confirm pending appointments with automatic patient notifications
+- **Patient Reschedule Requests**: Patients can request appointment rescheduling with availability validation
+- **Staff-Initiated Rescheduling**: Staff can propose new appointment times when schedules change
+- **Reschedule History Tracking**: Complete audit trail of all reschedule requests and responses
+- **Availability Validation**: Automatic conflict checking prevents double-booking within 30-minute windows
+- **Multi-Channel Notifications**: New notification service with SMS integration (email and push notifications ready for future implementation)
+
+#### 🔌 New API Endpoints
+
+- `POST /api/appointments/:id/confirm` - Staff confirms pending appointment
+- `POST /api/appointments/:id/reschedule/staff` - Staff proposes reschedule
+- `POST /api/appointments/:id/reschedule/patient` - Patient requests reschedule
+- `POST /api/appointments/:id/reschedule/respond` - Approve/reject reschedule
+- `GET /api/appointments/:id/reschedule/history` - View reschedule history
+
+#### 🔧 Technical Improvements
+
+- **Status State Machine**: Implemented 6-state appointment workflow (pending, confirmed, completed, cancelled, reschedule_pending_patient, pending_staff_review)
+- **Notification Service**: Centralized notification handling with channel abstraction
+- **Enhanced Data Model**: Added reschedule history array and cancellation reason tracking
+- **Staff Assignment**: Patients can now see assigned staff member details on confirmed appointments
+
+#### 📚 Documentation
+
+- **Comprehensive Workflow Guide**: Added `APPOINTMENT_WORKFLOW.md` with complete API reference, use cases, and testing scenarios
+- **End-to-End Testing**: All workflow features tested and verified working
+- **Security Documentation**: Role-based access control documented for all endpoints
+
+#### ✅ Verified Working
+
+All new features have been thoroughly tested and are production-ready.
+
+---
 
 ### Version 1.1.0 (November 2025)
 

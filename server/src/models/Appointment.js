@@ -28,13 +28,67 @@ const appointmentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "canceled", "completed"],
+      enum: [
+        "pending",
+        "confirmed",
+        "canceled",
+        "completed",
+        "reschedule_pending_patient", // Staff proposed new time, awaiting patient approval
+        "pending_staff_review", // Patient requested new time, awaiting staff approval
+      ],
       default: "pending",
     },
     notes: {
       type: String,
       trim: true,
     },
+    cancellationReason: {
+      type: String,
+      trim: true,
+    },
+    // Track reschedule history
+    rescheduleHistory: [
+      {
+        requestedBy: {
+          type: String,
+          enum: ["patient", "staff"],
+          required: true,
+        },
+        requestedById: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        originalTime: {
+          type: Date,
+          required: true,
+        },
+        proposedTime: {
+          type: Date,
+          required: true,
+        },
+        reason: {
+          type: String,
+          trim: true,
+        },
+        status: {
+          type: String,
+          enum: ["pending", "approved", "rejected"],
+          default: "pending",
+        },
+        respondedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        respondedAt: {
+          type: Date,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
