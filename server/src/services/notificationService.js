@@ -11,7 +11,7 @@ const User = require("../models/User");
 const sendConfirmationNotification = async (appointmentId, status) => {
   try {
     const appointment = await Appointment.findById(appointmentId)
-      .populate("patientId", "name phone")
+      .populate("patientId", "name phone consentSms")
       .populate("facilityId", "name")
       .populate("staffId", "name");
 
@@ -25,33 +25,48 @@ const sendConfirmationNotification = async (appointmentId, status) => {
 
     let message = "";
 
+    // Use shorter messages to work with Twilio trial (single segment)
+    const dateStr = new Date(appointment.scheduledAt).toLocaleDateString();
+    const timeStr = new Date(appointment.scheduledAt).toLocaleTimeString(
+      "en-US",
+      {
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+    );
+
     if (status === "confirmed") {
-      message = `✅ CONFIRMED: Your appointment at ${
-        facility.name
-      } on ${new Date(
-        appointment.scheduledAt
-      ).toLocaleString()} has been confirmed by ${
-        staff ? staff.name : "staff"
-      }. See you soon!`;
+      // Very short message for better delivery on trial
+      message = `Appointment confirmed at ${facility.name}. See you soon! - MediReach`;
     } else if (status === "canceled") {
-      message = `❌ CANCELLED: Your appointment at ${
-        facility.name
-      } on ${new Date(
-        appointment.scheduledAt
-      ).toLocaleString()} has been cancelled. ${
+      message = `Appointment cancelled: ${dateStr} ${timeStr}. ${
         appointment.cancellationReason
           ? "Reason: " + appointment.cancellationReason
           : ""
       }`;
     } else if (status === "completed") {
-      message = `✅ COMPLETED: Thank you for visiting ${facility.name}. We hope you had a great experience!`;
+      message = `Thank you for visiting ${facility.name}! - MediReach`;
     }
+
+    console.log("🔔 Preparing to send notification...");
+    console.log("   Patient:", patient.name);
+    console.log("   Phone:", patient.phone);
+    console.log("   Consent SMS:", patient.consentSms);
+    console.log("   Message:", message);
 
     // Send SMS notification if patient has consented
     let smsResult = null;
     if (patient.consentSms && patient.phone) {
+      console.log("📱 Sending SMS notification...");
       smsResult = await smsService.sendSms(patient.phone, message);
-      console.log("📱 Confirmation SMS sent:", smsResult);
+      console.log("✅ SMS Result:", JSON.stringify(smsResult, null, 2));
+    } else {
+      console.log(
+        "⚠️ SMS not sent - consent:",
+        patient.consentSms,
+        "phone:",
+        patient.phone
+      );
     }
 
     // TODO: Add real-time push notification here
@@ -82,9 +97,9 @@ const sendConfirmationNotification = async (appointmentId, status) => {
 const sendRescheduleRequest = async (appointmentId, newTime, requestedBy) => {
   try {
     const appointment = await Appointment.findById(appointmentId)
-      .populate("patientId", "name phone")
+      .populate("patientId", "name phone consentSms")
       .populate("facilityId", "name")
-      .populate("staffId", "name");
+      .populate("staffId", "name consentSms");
 
     if (!appointment) {
       throw new Error("Appointment not found");
@@ -158,9 +173,9 @@ const sendRescheduleResponse = async (
 ) => {
   try {
     const appointment = await Appointment.findById(appointmentId)
-      .populate("patientId", "name phone")
+      .populate("patientId", "name phone consentSms")
       .populate("facilityId", "name")
-      .populate("staffId", "name");
+      .populate("staffId", "name consentSms");
 
     if (!appointment) {
       throw new Error("Appointment not found");
