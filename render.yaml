@@ -22,9 +22,9 @@ services:
       - key: TWILIO_AUTH_TOKEN
         sync: false # Set this manually in Render dashboard (sensitive)
       - key: TWILIO_FROM
-        value: +12765958301
+        sync: false # Set this manually in Render dashboard (sensitive)
       - key: TWILIO_MESSAGING_SERVICE_SID
-        value: MG9ab607e8a44e741a51bd87c9b334a883
+        sync: false # Set this manually in Render dashboard (sensitive)
       - key: FRONTEND_URL
         value: https://your-frontend-app.vercel.app # UPDATE THIS with your actual frontend URL
       - key: TZ

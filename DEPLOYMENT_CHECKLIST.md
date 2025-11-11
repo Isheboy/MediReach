@@ -108,10 +108,10 @@ PORT=5000
 NODE_ENV=development
 
 # Database (REQUIRED)
-MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/medireach?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/medireach?retryWrites=true&w=majority
 
 # JWT (REQUIRED - Generate with: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
-JWT_SECRET=your_64_character_random_string_here
+JWT_SECRET=<your_64_character_random_string_here>
 
 # Frontend URL (REQUIRED for CORS)
 FRONTEND_URL=http://localhost:3000,https://your-production-domain.com
