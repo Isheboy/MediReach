@@ -3,12 +3,14 @@
 <div align="center">
 
 ![MediReach](https://img.shields.io/badge/Healthcare-Platform-blue?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Production_Ready-success?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Live-success?style=for-the-badge)
 ![SDG](https://img.shields.io/badge/SDG-3_Good_Health-orange?style=for-the-badge)
 
 **Modern healthcare appointment management system with automated SMS reminders**
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Demo](#-demo) • [Documentation](#-documentation)
+🌐 **[Live Demo](https://medi-reach-liart.vercel.app/)** | 📚 **[API Docs](https://medireach-hehm.onrender.com/health)**
+
+[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Deployment](#-deployment) • [Documentation](#-documentation)
 
 </div>
 
@@ -287,9 +289,11 @@ MediReach directly contributes to **Sustainable Development Goal 3** by:
    ```
 
 7. **Access the application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:5000
-   - API Documentation: http://localhost:5000/docs (if Swagger is installed)
+   - **Local Frontend**: http://localhost:3000
+   - **Local Backend**: http://localhost:5000
+   - **Production Frontend**: https://medi-reach-liart.vercel.app/
+   - **Production Backend**: https://medireach-hehm.onrender.com
+   - **API Health Check**: https://medireach-hehm.onrender.com/health
 
 ---
 
@@ -756,29 +760,173 @@ All new features have been thoroughly tested and are production-ready.
 - [ ] Mobile responsiveness
 - [ ] MongoDB Atlas cloud database connection
 
----
-
 ## 🚀 Deployment
 
-### Backend (Render/Railway/Heroku)
+### Production Environment
 
-1. Set environment variables in platform dashboard
-2. Connect GitHub repository
-3. Deploy from `main` branch
-4. Set start command: `cd server && npm start`
+MediReach is currently deployed and live:
 
-### Frontend (Vercel/Netlify)
+- **Frontend**: [https://medi-reach-liart.vercel.app/](https://medi-reach-liart.vercel.app/) (Vercel)
+- **Backend API**: [https://medireach-hehm.onrender.com](https://medireach-hehm.onrender.com) (Render)
+- **Database**: MongoDB Atlas (Cloud)
+- **SMS Provider**: Twilio (Production)
 
-1. Connect GitHub repository
-2. Set build command: `cd client && npm run build`
-3. Set output directory: `client/dist`
-4. Set environment variable: `VITE_API_URL=https://your-api-url.com`
+### Backend Deployment (Render)
+
+**Current Setup:**
+
+1. **Service**: Web Service on Render
+2. **Repository**: Connected to GitHub `Isheboy/MediReach`
+3. **Branch**: `main` (auto-deploy enabled)
+4. **Build Command**: `cd server && npm install`
+5. **Start Command**: `cd server && npm start`
+6. **Environment Variables**:
+   - `NODE_ENV=production`
+   - `PORT=10000`
+   - `MONGO_URI=mongodb+srv://...` (MongoDB Atlas connection)
+   - `JWT_SECRET=<secure_random_string>`
+   - `FRONTEND_URL=http://localhost:3000,https://medi-reach-liart.vercel.app`
+   - `SMS_PROVIDER=twilio`
+   - `TWILIO_ACCOUNT_SID=<your_sid>`
+   - `TWILIO_AUTH_TOKEN=<your_token>`
+   - `TWILIO_FROM=<your_phone>`
+   - `TZ=Africa/Dar_es_Salaam`
+
+**To Deploy Your Own:**
+
+```bash
+# 1. Create account on Render.com
+# 2. New Web Service → Connect GitHub repository
+# 3. Configure:
+Root Directory: server
+Build Command: npm install
+Start Command: npm start
+# 4. Add all environment variables from server/.env.example
+# 5. Deploy
+```
+
+### Frontend Deployment (Vercel)
+
+**Current Setup:**
+
+1. **Platform**: Vercel
+2. **Repository**: Connected to GitHub `Isheboy/MediReach`
+3. **Branch**: `main` (auto-deploy enabled)
+4. **Framework**: Vite
+5. **Root Directory**: `client`
+6. **Build Command**: `npm run build`
+7. **Output Directory**: `dist`
+8. **Environment Variables**:
+   - `VITE_API_URL=https://medireach-hehm.onrender.com`
+
+**Important Configuration Files:**
+
+- `client/vercel.json` - Configures SPA routing (rewrites all routes to index.html)
+
+**To Deploy Your Own:**
+
+```bash
+# 1. Create account on Vercel.com
+# 2. Import repository → Select MediReach
+# 3. Configure:
+Framework Preset: Vite
+Root Directory: client
+Build Command: npm run build
+Output Directory: dist
+# 4. Add environment variable:
+VITE_API_URL: https://your-backend-url.onrender.com
+# 5. Deploy
+```
 
 ### Database (MongoDB Atlas)
 
-1. Create cluster on MongoDB Atlas
-2. Whitelist IP addresses
-3. Update `MONGODB_URI` in environment variables
+**Current Setup:**
+
+1. **Cluster**: M0 Free Tier (Shared)
+2. **Region**: AWS / us-east-1
+3. **Database**: `medireach`
+4. **Collections**: `users`, `facilities`, `appointments`, `reminders`
+5. **Network Access**: Whitelist 0.0.0.0/0 (all IPs) for Render/Vercel
+
+**To Set Up Your Own:**
+
+```bash
+# 1. Create free account at https://www.mongodb.com/cloud/atlas
+# 2. Create New Cluster (M0 Free Tier)
+# 3. Database Access → Create Database User
+# 4. Network Access → Add IP Address (0.0.0.0/0 for cloud deployments)
+# 5. Connect → Get connection string
+# 6. Update MONGO_URI in Render environment variables
+```
+
+### CORS Configuration
+
+**Backend must allow frontend origin:**
+
+```javascript
+// server/.env
+FRONTEND_URL=http://localhost:3000,https://medi-reach-liart.vercel.app
+```
+
+**Note**: Remove trailing slashes from URLs to avoid CORS errors!
+
+### Continuous Deployment
+
+Both frontend and backend auto-deploy on push to `main` branch:
+
+```bash
+# Make changes locally
+git add .
+git commit -m "Your changes"
+git push origin main
+
+# Vercel: ~1 minute build + deploy
+# Render: ~2 minutes build + deploy
+```
+
+### Deployment Checklist
+
+Before deploying to production:
+
+- [ ] Set `NODE_ENV=production` on backend
+- [ ] Update `MONGO_URI` to MongoDB Atlas connection string
+- [ ] Generate secure `JWT_SECRET` (64+ characters)
+- [ ] Configure SMS provider credentials (Africa's Talking or Twilio)
+- [ ] Set correct `FRONTEND_URL` with deployed frontend URL (no trailing slash!)
+- [ ] Set `VITE_API_URL` to deployed backend URL on Vercel
+- [ ] Add `vercel.json` for SPA routing
+- [ ] Whitelist Render/Vercel IPs in MongoDB Atlas
+- [ ] Test all authentication flows
+- [ ] Test appointment booking end-to-end
+- [ ] Verify SMS notifications work
+- [ ] Check CORS headers allow frontend origin
+- [ ] Monitor error logs for first 24 hours
+
+### Monitoring & Logs
+
+**Render Dashboard:**
+
+- View real-time logs: `Logs` tab in service dashboard
+- Monitor deployment status: `Events` tab
+- Check health: https://medireach-hehm.onrender.com/health
+
+**Vercel Dashboard:**
+
+- View build logs: Click on deployment
+- Monitor analytics: `Analytics` tab
+- Check deployment status: `Deployments` page
+
+### Troubleshooting
+
+**Common Issues:**
+
+1. **CORS Errors**: Ensure `FRONTEND_URL` matches exactly (no trailing slash)
+2. **404 on Refresh**: Add `vercel.json` with rewrites configuration
+3. **API Connection Failed**: Check `VITE_API_URL` is correct
+4. **MongoDB Connection Error**: Whitelist IP 0.0.0.0/0 in Atlas
+5. **SMS Not Sending**: Verify SMS provider credentials in environment variables
+6. Whitelist IP addresses
+7. Update `MONGODB_URI` in environment variables
 
 ---
 
