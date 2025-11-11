@@ -69,9 +69,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-linear-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <Heart className="h-6 w-6 text-white" />
-              </div>
+              <img src="/logo.svg" alt="MediReach Logo" className="w-10 h-10" />
               <span className="text-2xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 MediReach
               </span>
@@ -120,7 +118,7 @@ export default function Home() {
               </span>
             </h1>
 
-            <p className="text-xl text-slate-600 leading-relaxed">
+            <p className="text-xl text-slate-700 leading-relaxed">
               Book appointments with top healthcare facilities in seconds.
               MediReach connects you to quality care with automatic reminders
               and seamless appointment management.
@@ -187,7 +185,7 @@ export default function Home() {
                       {item.step}
                     </div>
                     <div className="flex items-center gap-3 flex-1">
-                      <item.icon className="h-5 w-5 text-slate-600" />
+                      <item.icon className="h-5 w-5 text-slate-700" />
                       <span className="font-medium text-slate-900">
                         {item.title}
                       </span>
@@ -215,7 +213,7 @@ export default function Home() {
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
               Why Choose MediReach?
             </h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            <p className="text-lg text-slate-700 max-w-2xl mx-auto">
               Modern healthcare appointment management designed for your
               convenience
             </p>
@@ -301,12 +299,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
-                <Heart className="h-5 w-5 text-white" />
-              </div>
+              <img src="/logo.svg" alt="MediReach Logo" className="w-8 h-8" />
               <span className="text-xl font-bold">MediReach</span>
             </div>
-            <p className="text-slate-400">
+            <p className="text-slate-500">
               © 2025 MediReach. Simplifying Healthcare Access.
             </p>
           </div>

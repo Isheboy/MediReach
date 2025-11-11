@@ -24,6 +24,7 @@ import StaffProfile from "@/pages/staff/Profile";
 import ManageFacilities from "@/pages/ManageFacilities";
 import BrowseFacilities from "@/pages/BrowseFacilities";
 import ReminderLogs from "@/pages/ReminderLogs";
+import NotFound from "@/pages/NotFound";
 
 function App() {
   return (
@@ -124,7 +125,7 @@ function App() {
               </StaffRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AuthProvider>

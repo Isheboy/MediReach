@@ -161,15 +161,9 @@ const StaffAppointments = () => {
 
       const response = await api.get("/api/appointments/staff", { params });
 
-      console.log("✅ Appointments fetched successfully:", response.data);
-      console.log("Total appointments:", response.data.length);
-
       setAppointments(response.data);
     } catch (error) {
-      console.error("❌ Error fetching appointments:", error);
-      console.error("Error response:", error.response?.data);
-      console.error("Error status:", error.response?.status);
-      console.error("Error message:", error.message);
+      // Error fetching appointments
 
       // Show specific error message
       if (error.response?.status === 403) {
@@ -244,27 +238,14 @@ const StaffAppointments = () => {
         `/api/appointments/${appointmentId}/confirm`
       );
 
-      console.log("✅ Appointment confirmed:", response.data);
-
       // Show success message
       alert(
         `✅ ${appointmentService} confirmed successfully! Patient has been notified.`
       );
 
-      // If we're filtering by pending, the confirmed appointment will disappear
-      // This is expected behavior - switch to "all" to see it
-      if (statusFilter === "pending") {
-        console.log(
-          "💡 Tip: Switch filter to 'All Statuses' to see confirmed appointment"
-        );
-      }
-
       // Re-fetch to get updated data
       await fetchAppointments();
     } catch (error) {
-      console.error("❌ Error confirming appointment:", error);
-      console.error("Error details:", error.response?.data);
-
       const errorMessage =
         error.response?.data?.error || "Failed to confirm appointment";
       setError(errorMessage);
@@ -298,7 +279,6 @@ const StaffAppointments = () => {
       // Re-fetch to confirm
       await fetchAppointments();
     } catch (error) {
-      console.error("Error cancelling appointment:", error);
       setError("Failed to cancel appointment");
       // Revert optimistic update on error
       await fetchAppointments();

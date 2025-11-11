@@ -9,3 +9,12 @@ coverage/
 .vscode/
 .idea/
 server/postman/
+
+# Internal session documentation
+ACCESSIBILITY_FIXES.md
+DEPLOYMENT_CHECKLIST.md
+DEPLOYMENT_REPORT.md
+FINAL_DEPLOYMENT_AUDIT.md
+FRONTEND_QA_REPORT.md
+PRODUCTION_READINESS.md
+test-api.js

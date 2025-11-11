@@ -70,12 +70,6 @@ const StaffDashboard = () => {
 
       const pendingAppointments = allPendingRes.data;
 
-      // Debug logging
-      console.log("📊 Dashboard Data Fetched:");
-      console.log("Today's Appointments:", todayAppointments);
-      console.log("Pending Appointments (ALL):", pendingAppointments);
-      console.log("Pending Count:", pendingAppointments.length);
-
       // Calculate metrics
       setMetrics({
         todayAppointments: todayAppointments.length,
@@ -90,12 +84,7 @@ const StaffDashboard = () => {
       // Set today's schedule (first 5 appointments)
       setTodaySchedule(todayAppointments.slice(0, 5));
     } catch (error) {
-      console.error("❌ Error fetching dashboard data:", error);
-      console.error("Error details:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
+      // Error fetching dashboard data - check authentication
     } finally {
       setLoading(false);
     }

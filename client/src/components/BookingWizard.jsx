@@ -299,11 +299,11 @@ export default function BookingWizard({ onComplete }) {
           <div className="flex items-start gap-3">
             <Building2 className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-slate-600">Facility</p>
+              <p className="text-sm font-medium text-slate-700">Facility</p>
               <p className="text-base font-semibold text-slate-900">
                 {selectedFacility?.name}
               </p>
-              <p className="text-sm text-slate-600 flex items-center gap-1 mt-1">
+              <p className="text-sm text-slate-700 flex items-center gap-1 mt-1">
                 <MapPin className="h-3 w-3" />
                 {selectedFacility?.location}
               </p>
@@ -315,7 +315,7 @@ export default function BookingWizard({ onComplete }) {
           <div className="flex items-start gap-3">
             <Stethoscope className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-slate-600">Service</p>
+              <p className="text-sm font-medium text-slate-700">Service</p>
               <p className="text-base font-semibold text-slate-900">
                 {selectedService === "Other" ? customService : selectedService}
               </p>
@@ -327,11 +327,11 @@ export default function BookingWizard({ onComplete }) {
           <div className="flex items-start gap-3">
             <CalendarIcon className="h-5 w-5 text-blue-600 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-slate-600">Date & Time</p>
+              <p className="text-sm font-medium text-slate-700">Date & Time</p>
               <p className="text-base font-semibold text-slate-900">
                 {format(selectedDate, "PPPP")}
               </p>
-              <p className="text-sm text-slate-600 flex items-center gap-1 mt-1">
+              <p className="text-sm text-slate-700 flex items-center gap-1 mt-1">
                 <Clock className="h-3 w-3" />
                 {selectedTime}
               </p>
@@ -426,11 +426,11 @@ export default function BookingWizard({ onComplete }) {
           {appointmentDetails && (
             <div className="bg-slate-50 rounded-lg p-4 space-y-2 my-4">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Facility:</span>
+                <span className="text-slate-700">Facility:</span>
                 <span className="font-medium">{selectedFacility?.name}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Service:</span>
+                <span className="text-slate-700">Service:</span>
                 <span className="font-medium">
                   {selectedService === "Other"
                     ? customService
@@ -438,17 +438,17 @@ export default function BookingWizard({ onComplete }) {
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Date:</span>
+                <span className="text-slate-700">Date:</span>
                 <span className="font-medium">
                   {format(selectedDate, "PPP")}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Time:</span>
+                <span className="text-slate-700">Time:</span>
                 <span className="font-medium">{selectedTime}</span>
               </div>
               <div className="flex justify-between text-sm pt-2 border-t">
-                <span className="text-slate-600">Status:</span>
+                <span className="text-slate-700">Status:</span>
                 <Badge variant="secondary">Pending Confirmation</Badge>
               </div>
             </div>

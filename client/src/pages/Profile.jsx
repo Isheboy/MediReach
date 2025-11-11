@@ -111,7 +111,7 @@ export default function Profile() {
                 <h2 className="text-2xl font-bold text-slate-900">
                   My Appointments
                 </h2>
-                <p className="text-slate-600 mt-1">
+                <p className="text-slate-700 mt-1">
                   View and manage your healthcare appointments
                 </p>
               </div>
@@ -144,12 +144,12 @@ export default function Profile() {
               <CardContent>
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                    <FileText className="h-8 w-8 text-slate-400" />
+                    <FileText className="h-8 w-8 text-slate-500" />
                   </div>
                   <h3 className="text-lg font-semibold text-slate-900 mb-2">
                     No Records Available
                   </h3>
-                  <p className="text-slate-600 text-center max-w-md">
+                  <p className="text-slate-700 text-center max-w-md">
                     Your medical records and documents will appear here once
                     they are uploaded by your healthcare provider.
                   </p>
@@ -191,7 +191,7 @@ export default function Profile() {
 
                     <div className="space-y-2">
                       <Label htmlFor="name" className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-slate-600" />
+                        <User className="h-4 w-4 text-slate-700" />
                         Full Name
                       </Label>
                       <Input
@@ -207,7 +207,7 @@ export default function Profile() {
 
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-slate-600" />
+                        <Mail className="h-4 w-4 text-slate-700" />
                         Email Address
                       </Label>
                       <Input
@@ -215,14 +215,14 @@ export default function Profile() {
                         disabled
                         className="bg-slate-50 border-2"
                       />
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-700">
                         Email cannot be changed
                       </p>
                     </div>
 
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-slate-600" />
+                        <Phone className="h-4 w-4 text-slate-700" />
                         Phone Number
                       </Label>
                       <Input
@@ -278,7 +278,7 @@ export default function Profile() {
                         >
                           SMS Reminders
                         </Label>
-                        <p className="text-sm text-slate-600 mt-1">
+                        <p className="text-sm text-slate-700 mt-1">
                           Receive appointment reminders via SMS
                         </p>
                       </div>
@@ -345,7 +345,7 @@ export default function Profile() {
                     <p className="font-medium text-slate-900">
                       Book Appointment
                     </p>
-                    <p className="text-sm text-slate-600">Schedule new visit</p>
+                    <p className="text-sm text-slate-700">Schedule new visit</p>
                   </div>
                 </div>
               </CardContent>
@@ -363,7 +363,7 @@ export default function Profile() {
                     <p className="font-medium text-slate-900">
                       Find Facilities
                     </p>
-                    <p className="text-sm text-slate-600">Browse providers</p>
+                    <p className="text-sm text-slate-700">Browse providers</p>
                   </div>
                 </div>
               </CardContent>
@@ -379,7 +379,7 @@ export default function Profile() {
                   </div>
                   <div>
                     <p className="font-medium text-slate-900">SMS History</p>
-                    <p className="text-sm text-slate-600">View reminders</p>
+                    <p className="text-sm text-slate-700">View reminders</p>
                   </div>
                 </div>
               </CardContent>
@@ -395,7 +395,7 @@ export default function Profile() {
                   </div>
                   <div>
                     <p className="font-medium text-slate-900">Home</p>
-                    <p className="text-sm text-slate-600">Return to homepage</p>
+                    <p className="text-sm text-slate-700">Return to homepage</p>
                   </div>
                 </div>
               </CardContent>

@@ -72,7 +72,7 @@ export default function Appointments() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-blue-50 to-white">
-        <div className="text-lg text-slate-600">Loading appointments...</div>
+        <div className="text-lg text-slate-700">Loading appointments...</div>
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default function Appointments() {
               <h1 className="text-3xl sm:text-4xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 My Appointments
               </h1>
-              <p className="text-slate-600 mt-2">
+              <p className="text-slate-700 mt-2">
                 Manage and track your healthcare appointments
               </p>
             </div>
@@ -160,7 +160,7 @@ export default function Appointments() {
                   <h3 className="text-lg font-semibold text-slate-900 mb-2">
                     No upcoming appointments
                   </h3>
-                  <p className="text-slate-600 text-center mb-6 max-w-md">
+                  <p className="text-slate-700 text-center mb-6 max-w-md">
                     Schedule your first appointment to get started with your
                     healthcare journey
                   </p>
@@ -190,12 +190,12 @@ export default function Appointments() {
               <Card className="border-2 border-dashed">
                 <CardContent className="flex flex-col items-center justify-center py-16">
                   <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                    <Clock className="h-8 w-8 text-slate-600" />
+                    <Clock className="h-8 w-8 text-slate-700" />
                   </div>
                   <h3 className="text-lg font-semibold text-slate-900 mb-2">
                     No past appointments
                   </h3>
-                  <p className="text-slate-600 text-center">
+                  <p className="text-slate-700 text-center">
                     Your appointment history will appear here
                   </p>
                 </CardContent>
@@ -238,16 +238,16 @@ function AppointmentCard({ appointment, getStatusVariant, isPast = false }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <Separator />
-        <div className="flex items-center gap-2 text-sm text-slate-600">
+        <div className="flex items-center gap-2 text-sm text-slate-700">
           <Calendar className="h-4 w-4 text-blue-600" />
           <span>{format(new Date(appointment.scheduledAt), "PPP")}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-slate-600">
+        <div className="flex items-center gap-2 text-sm text-slate-700">
           <Clock className="h-4 w-4 text-blue-600" />
           <span>{format(new Date(appointment.scheduledAt), "p")}</span>
         </div>
         {appointment.facilityId?.location && (
-          <div className="flex items-start gap-2 text-sm text-slate-600">
+          <div className="flex items-start gap-2 text-sm text-slate-700">
             <MapPin className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
             <span className="line-clamp-2">
               {appointment.facilityId.location}
