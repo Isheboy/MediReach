@@ -10,6 +10,9 @@ coverage/
 .idea/
 server/postman/
 
+# Documentation folder (if created)
+docs/
+
 # Internal session documentation
 ACCESSIBILITY_FIXES.md
 DEPLOYMENT_CHECKLIST.md

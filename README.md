@@ -24,7 +24,9 @@
 - [Getting Started](#-getting-started)
 - [Project Structure](#-project-structure)
 - [API Documentation](#-api-documentation)
+- [Deployment](#-deployment)
 - [Environment Variables](#-environment-variables)
+- [Testing](#-testing)
 - [Contributing](#-contributing)
 - [License](#-license)
 
