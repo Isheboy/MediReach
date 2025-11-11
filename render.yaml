@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: medireach-api
+    env: node
+    region: oregon # Choose closest to your users: oregon, frankfurt, singapore
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false # Set this manually in Render dashboard (sensitive)
+      - key: JWT_SECRET
+        sync: false # Set this manually in Render dashboard (sensitive)
+      - key: SMS_PROVIDER
+        value: twilio
+      - key: TWILIO_ACCOUNT_SID
+        sync: false # Set this manually in Render dashboard (sensitive)
+      - key: TWILIO_AUTH_TOKEN
+        sync: false # Set this manually in Render dashboard (sensitive)
+      - key: TWILIO_FROM
+        value: +12765958301
+      - key: TWILIO_MESSAGING_SERVICE_SID
+        value: MG9ab607e8a44e741a51bd87c9b334a883
+      - key: FRONTEND_URL
+        value: https://your-frontend-app.vercel.app # UPDATE THIS with your actual frontend URL
+      - key: TZ
+        value: Africa/Dar_es_Salaam
+      - key: REMINDER_POLL_INTERVAL_SECONDS
+        value: 60
+    healthCheckPath: /health
